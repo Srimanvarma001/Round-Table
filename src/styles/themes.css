@@ -1,0 +1,187 @@
+/* ===========================================================================
+   Theme tokens — section 16.8.
+
+   This is the ONLY file in the codebase permitted to contain a hex literal.
+   Every component colour is a `var(--token)` reference or a Tailwind utility
+   derived from one. Seat accents are applied via `var(--seat-N)` resolved from
+   `agents.accent_token`, never from a raw `accent_color` value, so a single
+   theme switch recolours all eight seats with no other change.
+
+   Both sets are first-class: they define the SAME key list, so no component
+   can reference a token that exists in one theme and not the other. The theme
+   token unit test asserts that.
+   =========================================================================== */
+
+:root,
+:root[data-theme='warroom'] {
+  color-scheme: dark;
+
+  --bg: #08090b;
+  --bg-elev-1: #0f1115;
+  --bg-elev-2: #161920;
+  --bg-elev-3: #1d2129;
+  --line: #232833;
+  --line-strong: #303746;
+  --text: #e7eaf0;
+  --text-dim: #9aa3b2;
+  --text-mute: #6b7280;
+  --danger: #f87171;
+  --warn: #fbbf24;
+  --ok: #4ade80;
+
+  /* table surface */
+  --table-core: #131a24;
+  --table-mid: #0e1219;
+  --table-edge: #090c11;
+  --table-shadow: rgba(0, 0, 0, 0.78);
+  --table-pool: #1d4ed8;
+  --table-ring: #2a3341;
+  --rim-hi: #c9d4e6;
+  --rim-lo: #000000;
+
+  /* seat accents */
+  --seat-1: #f0b429; /* Me Agent */
+  --seat-2: #4ecdc4; /* Pragmatist */
+  --seat-3: #e879f9; /* Wildcard */
+  --seat-4: #4ade80; /* Market Analyst */
+  --seat-5: #60a5fa; /* Technical Architect */
+  --seat-6: #f87171; /* Contrarian */
+  --seat-7: #a78bfa; /* Mentor */
+  --seat-8: #22d3ee; /* Trend-Watcher */
+
+  --grid: rgba(255, 255, 255, 0.022);
+
+  /* Elevation, section 16.9. In the war-room theme elevation reads mostly as
+     surface lightness with a soft black shadow underneath. */
+  --elev-1: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --elev-2: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --elev-3: 0 24px 64px rgba(0, 0, 0, 0.58);
+
+  /* The table's own contact shadow colour, reused by seat auras. */
+  --shadow-tint: 0, 0, 0;
+}
+
+:root[data-theme='hearth'] {
+  color-scheme: light;
+
+  --bg: #f5efe4;
+  --bg-elev-1: #fbf7ef;
+  --bg-elev-2: #ffffff;
+  --bg-elev-3: #fffdf8;
+  --line: #e2d6c0;
+  --line-strong: #cfbe9f;
+  --text: #2b2118;
+  --text-dim: #6b5b45;
+  --text-mute: #8c7b62;
+  --danger: #b91c1c;
+  --warn: #92400e;
+  --ok: #15803d;
+
+  --table-core: #dcc9a8;
+  --table-mid: #c9b18c;
+  --table-edge: #b99a70;
+  --table-shadow: rgba(90, 70, 40, 0.32);
+  --table-pool: #f0b429;
+  --table-ring: #7a6242;
+  --rim-hi: #fff6e6;
+  --rim-lo: #6b5433;
+
+  --seat-1: #8a4308;
+  --seat-2: #0a5a54;
+  --seat-3: #a21caf;
+  --seat-4: #0f6130;
+  --seat-5: #1d4ed8;
+  --seat-6: #b91c1c;
+  --seat-7: #6d28d9;
+  --seat-8: #0a5f78;
+
+  --grid: rgba(60, 40, 20, 0.045);
+
+  /* Stacking light surfaces reads as mud, so hearth expresses elevation
+     mostly through shadow with a warm tint. */
+  --elev-1: 0 4px 14px rgba(120, 95, 60, 0.14);
+  --elev-2: 0 10px 28px rgba(120, 95, 60, 0.18);
+  --elev-3: 0 20px 56px rgba(120, 95, 60, 0.24);
+
+  --shadow-tint: 120, 95, 60;
+}
+
+/* ---------------------------------------------------------------------------
+   Theme-independent tokens. Section 16.9.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Spacing is a 4px base scale: 4 8 12 16 24 32 48 64. Exposed so components
+     can reference the scale by name rather than by magic number. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii. Pills and avatars 9999, cards and bubbles 12, panels and drawers
+     16. The table SVG has its own curvature and takes no radius. */
+  --radius-pill: 9999px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+
+  /* Type scale, in rem at a 16px root. */
+  --fs-display: 2.25rem;
+  --fs-h1: 1.5rem;
+  --fs-h2: 1.125rem;
+  --fs-body: 0.875rem;
+  --fs-small: 0.8125rem;
+  --fs-micro: 0.6875rem;
+
+  --tracking-micro: 0.08em;
+
+  /* Seat geometry. */
+  --seat-diameter: clamp(52px, 7.2vw, 92px);
+  --drawer-width: 480px;
+
+  /* Focus ring: 2px blue at a 2px offset, never removed. Section 16.9. */
+  --focus-ring: 2px solid var(--seat-5);
+  --focus-offset: 2px;
+}
+
+/* Faint background grid for depth: 24px cell, drawn with two linear-gradient
+   layers. No texture image assets in either theme. Section 16.8. */
+.themed-grid {
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------------------------------------------------------------------------
+   Warm serif display face for the hearth theme. Section 16.9 says hearth's
+   serif is its single strongest signal.
+   --------------------------------------------------------------------------- */
+
+.display-face {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+:root[data-theme='hearth'] .display-face {
+  font-family: var(--font-display-serif), Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Numerals must be tabular in both themes: scores that shift width while
+   counting up look broken. Section 16.9. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Small-caps step labels. Section 16.9. */
+.step-label {
+  font-size: var(--fs-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+}

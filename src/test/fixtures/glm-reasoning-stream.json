@@ -1,0 +1,17 @@
+{
+  "comment": "Recorded shape of a GLM glm-5.3-flash streaming response (docs/PROVIDER-NOTES.md sections 2 and 4). Reasoning arrives as delta.reasoning_content; the final chunk carries usage with prompt/completion tokens.",
+  "chunks": [
+    { "choices": [{ "delta": { "reasoning_content": "Reading the brief", "content": "" }, "finish_reason": null }] },
+    { "choices": [{ "delta": { "reasoning_content": " through this seat's lens.", "content": "" }, "finish_reason": null }] },
+    { "choices": [{ "delta": { "content": "{\"proposals\": [" }, "finish_reason": null }] },
+    { "choices": [{ "delta": { "content": "{\"title\": \"Sprout Log\"}]}" }, "finish_reason": "stop" }] },
+    {
+      "choices": [],
+      "usage": {
+        "prompt_tokens": 812,
+        "completion_tokens": 96,
+        "completion_tokens_details": { "reasoning_tokens": 60 }
+      }
+    }
+  ]
+}

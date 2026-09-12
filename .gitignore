@@ -1,0 +1,27 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# secrets
+.env
+.env.local
+.env*.local
+
+# database and runtime data
+data/*
+!data/.gitkeep
+!data/uploads/
+data/uploads/*
+!data/uploads/.gitkeep
+!data/notes/
+data/notes/*
+!data/notes/.gitkeep
+
+# tooling
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+*.log

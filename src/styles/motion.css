@@ -1,0 +1,121 @@
+/* ===========================================================================
+   Shared keyframes that are cheaper in CSS than in Framer Motion, section 4.4.
+
+   Motion budget rules (section 16.13) that these must obey:
+     - animate ONLY `transform` and `opacity`
+     - never animate box-shadow, filter, width or height
+     - cap concurrent infinite animations at eight auras and eight clouds
+   =========================================================================== */
+
+/* The engraved ring rotation during the debate step. Section 16.2: the rings
+   gain a slow 24-second rotation. Transform-only, so it composites. */
+@keyframes rt-ring-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-ring-rotate {
+  animation: rt-ring-rotate 24s linear infinite;
+  transform-origin: 500px 310px;
+}
+
+/* The single outward ripple that crosses the surface on reveal.
+   Section 16.2: opacity and transform on existing elements, never new
+   geometry, so the SVG never re-renders. */
+@keyframes rt-reveal-ripple {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.82);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+.animate-reveal-ripple {
+  animation: rt-reveal-ripple 1.6s cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+  transform-origin: 500px 310px;
+}
+
+/* The rim brightening during propose. Opacity only. */
+@keyframes rt-rim-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-rim-breathe {
+  animation: rt-rim-breathe 4s ease-in-out infinite;
+}
+
+/* Typewriter reveal for the drawer's reasoning pane. Section 16.13: this is a
+   CSS mask over already-rendered text, NOT a per-character animation. A per
+   character animation re-renders and re-lays-out the bubble hundreds of times
+   per step. */
+@keyframes rt-typewriter-mask {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.animate-typewriter {
+  animation: rt-typewriter-mask 1.1s steps(40, end) 1 both;
+}
+
+/* Slow pulse used by the non-animated reduced-motion fallbacks where an
+   opacity fade is still acceptable. */
+@keyframes rt-soft-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-soft-pulse {
+  animation: rt-soft-pulse 2.2s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion, section 16.12.
+   State changes still occur; only the motion is removed. The stagger cadence
+   drop to zero is a JS concern handled in useStaggerQueue.
+   --------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ring-rotate,
+  .animate-reveal-ripple,
+  .animate-rim-breathe,
+  .animate-typewriter,
+  .animate-soft-pulse {
+    animation: none !important;
+  }
+
+  /* The typewriter mask would otherwise leave text clipped and invisible. */
+  .animate-typewriter {
+    clip-path: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,14 @@
+# pnpm 12 reads build-script approval from here.
+#
+# better-sqlite3 13 ships prebuilt binaries (prebuilds/win32-x64.node, and the
+# equivalent for every other platform) which lib/binding.js loads directly. It
+# has no install script of its own, so pnpm's default for a package containing
+# binding.gyp is to run `node-gyp rebuild` — which needs MSVC and fails on a
+# machine without it. Denying the build keeps the bundled prebuild, which is
+# the intended path.
+#
+# esbuild needs its build step to fetch/verify its native binary.
+allowBuilds:
+  better-sqlite3: false
+  esbuild: true
+  unrs-resolver: false

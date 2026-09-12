@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // CLI scripts run under plain Node via tsx, where the real `server-only`
+    // package throws (its empty variant is only served under Next's
+    // `react-server` export condition). The scripts ARE the server, so the
+    // guard is stubbed here exactly as it is for vitest. Nothing in `src/app`
+    // or `src/lib` is affected: Next never reads this file.
+    "baseUrl": "..",
+    "paths": {
+      "@/*": ["./src/*"],
+      "server-only": ["./src/test/stubs/server-only.ts"]
+    }
+  },
+  "include": ["./**/*.ts", "../src/**/*.ts"]
+}

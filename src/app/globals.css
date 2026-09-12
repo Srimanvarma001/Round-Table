@@ -1,0 +1,79 @@
+@import 'tailwindcss';
+
+@import '../styles/themes.css';
+@import '../styles/motion.css';
+
+/* Expose the two font families loaded by next/font to the CSS token layer.
+   Values are injected as CSS variables by `src/app/layout.tsx`. */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display-serif), Georgia, serif;
+}
+
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: var(--fs-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Focus rings, section 16.9: 2px --seat-5 at a 2px offset on every
+     interactive element, never removed. Keyboard users navigate seats, and a
+     focus ring that disappears over a dark table makes the product unusable
+     without a mouse. */
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-offset);
+    border-radius: 4px;
+  }
+
+  /* Scrollbars tuned per theme rather than left to the OS default, which reads
+     as a bright stripe against the war-room ground. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--line-strong);
+    border-radius: var(--radius-pill);
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  /* Screen-reader-only, used by the live regions in section 16.12. */
+  .sr-only-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}

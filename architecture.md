@@ -5,6 +5,8 @@
 Version 1.1 · Status: Approved for implementation · Target: v1 complete (all six milestones)
 
 **Changelog**
+- 1.3 — Hearth theme contrast fix (2026-09-11): seats 1, 2, 4 and 8 failed the section 16.4 3:1 check against the table surface; darkened with hue preserved, per the section's own rule. Covered by the theme-token unit test.
+- 1.2 — DeepSeek removed by owner decision: every seat, the reveal synthesis and profile extraction run on GLM. Provider tables, environment variables and the outage story updated; docs/PROVIDER-NOTES.md records the verified live behaviour.
 - 1.1 — Section 4.4 and Section 16 rewritten as a full UI design specification: seat layout math, avatar system, motion specs, theme tokens, responsive behaviour. Agent schema extended with avatar fields.
 - 1.0 — Initial approved specification.
 
@@ -76,7 +78,7 @@ These were decided during the design interview. Do not re-litigate them during i
 | Runtime shape | Local single-user, deploy-ready | Fastest to build, no auth surface, but no schema or config rewrite needed to host later |
 | Framework | Next.js (App Router) + TypeScript | One deploy unit, one language, Route Handlers give streaming responses for free |
 | Database | SQLite via Drizzle ORM | Zero setup, single file, inspectable with any SQLite browser, typed schema |
-| LLM providers | DeepSeek and GLM, split across the seats | Both are OpenAI-compatible, so one adapter serves both |
+| LLM providers | GLM only, every seat | OpenAI-compatible, so one adapter serves it; DeepSeek was removed by owner decision (2026-09-11, docs/PROVIDER-NOTES.md) |
 | Transport | Server-Sent Events for server to client, plain POST for control | All live traffic is one-way; control actions are discrete and idempotent |
 | Stop button | Pause and resume | Keeps completed work, resumes from the next pending task, no wasted tokens |
 | Web search | Tavily API, real calls, for the Trend-Watcher only | Live landscape input; interface is abstracted so the provider can be swapped |
@@ -122,8 +124,7 @@ These were decided during the design interview. Do not re-litigate them during i
 │  ProfileService ──► Ingestors (GitHub / CV / local scan / notes)     │
 │                        └─ LLM extraction → profile items → summary   │
 │                                                                      │
-│  LLM Adapter Registry ──► OpenAICompatibleAdapter ─┬─ DeepSeek       │
-│                                                    └─ GLM            │
+│  LLM Adapter Registry ──► OpenAICompatibleAdapter ─── GLM             │
 │  Search Adapter ──► TavilyAdapter                                    │
 └───────────────┬──────────────────────────────────────────────────────┘
                 │ Drizzle ORM
@@ -167,7 +168,7 @@ These were decided during the design interview. Do not re-litigate them during i
 
 | Layer | Choice | Notes |
 |---|---|---|
-| LLM client | `openai` npm package, used with a custom `baseURL` per provider | Both DeepSeek and GLM expose OpenAI-compatible chat completions with streaming |
+| LLM client | `openai` npm package, used with a custom `baseURL` | GLM exposes OpenAI-compatible chat completions with streaming |
 | GitHub | `@octokit/rest` plus `@octokit/graphql` | REST for repos and languages, GraphQL for contribution calendar |
 | CV parsing | `pdf-parse` for PDF, `mammoth` for DOCX | Markdown and plain text go straight through |
 | Web search | Tavily REST API via `fetch` | No SDK required |
@@ -340,9 +341,7 @@ All environment access goes through `src/lib/config.ts`. **MUST**: no other file
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
-| `DEEPSEEK_API_KEY` | yes | — | DeepSeek key |
-| `DEEPSEEK_BASE_URL` | no | `https://api.deepseek.com/v1` | Override for proxies |
-| `GLM_API_KEY` | yes | — | Zhipu GLM key |
+| `GLM_API_KEY` | yes | — | Zhipu GLM key; the only provider |
 | `GLM_BASE_URL` | no | `https://open.bigmodel.cn/api/paas/v4` | Override for proxies |
 | `TAVILY_API_KEY` | yes for live search | — | Trend-Watcher search |
 | `GITHUB_TOKEN` | recommended | — | Fine-grained PAT, read-only public and private repo scope. Without it GitHub rate limits to 60 requests per hour |
@@ -425,8 +424,8 @@ One row per seat. Seeded with the eight defaults, fully editable afterwards.
 | `name` | text | Display name, editable |
 | `is_me_agent` | integer | Boolean. Exactly one row may be true |
 | `lens_prompt` | text | The seat's evaluative lens. Editable |
-| `provider` | text | `deepseek` \| `glm` \| `mock` |
-| `model_id` | text | For example `deepseek-chat` |
+| `provider` | text | `glm` \| `mock` |
+| `model_id` | text | For example `glm-5.3-flash` |
 | `temperature` | real | Per-seat |
 | `weight` | real | Raw weight, normalised at vote time |
 | `avatar_style` | text | `dicebear` \| `lucide` \| `initials`. Default `dicebear`. Section 16.3 |
@@ -598,7 +597,7 @@ export interface LLMDelta {
 }
 
 export interface AgentCallRequest {
-  provider: 'deepseek' | 'glm' | 'mock';
+  provider: 'glm' | 'mock';
   modelId: string;
   messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
   temperature: number;
@@ -632,7 +631,6 @@ export interface LLMAdapter {
 
 | Provider | Base URL | Auth |
 |---|---|---|
-| `deepseek` | `https://api.deepseek.com/v1` | `Authorization: Bearer <DEEPSEEK_API_KEY>` |
 | `glm` | `https://open.bigmodel.cn/api/paas/v4` | `Authorization: Bearer <GLM_API_KEY>` |
 
 `registry.ts` maps a provider key to a memoised adapter instance. It throws a typed `MissingProviderKeyError` at call time, not at import time, so the app boots without keys and fails only on an actual generation attempt.
@@ -641,11 +639,11 @@ export interface LLMAdapter {
 
 These are the differences that break naive OpenAI-compatible code. Handle each explicitly and cover each with a unit test using a recorded fixture.
 
-1. **Reasoning channels have different field names.** DeepSeek reasoning models emit `delta.reasoning_content` alongside or instead of `delta.content`. GLM emits a thinking block in a provider-specific field. The adapter **MUST** normalise both into `LLMDelta { kind: 'reasoning' }` and `{ kind: 'text' }`. If a provider's reasoning field is absent, the adapter emits no reasoning deltas and the UI simply shows no reasoning for that seat.
+1. **Reasoning channel field.** GLM emits `delta.reasoning_content` on streaming deltas. The adapter **MUST** normalise it into `LLMDelta { kind: 'reasoning' }` alongside `{ kind: 'text' }`. If the field is absent on a response, the adapter emits no reasoning deltas and the UI simply shows no reasoning for that seat.
 2. **Usage on stream requires an option.** Streaming responses do not always include a usage block. The adapter **MUST** request stream usage where supported and fall back to a local token estimate (characters divided by four, rounded up) so the budget guard always has a number.
 3. **JSON mode is not universal.** The adapter **MUST** treat `jsonMode` as a hint. Actual enforcement happens in `lib/llm/json.ts`, which extracts the first balanced JSON object from the text, validates it with Zod, and on failure performs exactly one repair retry with a shortened corrective message. Two consecutive failures raise `StructuredOutputError`, which the scheduler records against the task.
 4. **Rate limits and transient errors.** HTTP 429 and 5xx are retried by the scheduler, not the adapter. The adapter **MUST** classify errors into `{ retryable: true | false }` and surface that on a typed error. 4xx other than 429 is not retryable.
-5. **Time to first token differs.** DeepSeek reasoning models can think for many seconds before emitting the first content token. The UI **MUST NOT** treat a silent stream as stalled before the per-call timeout. Reasoning deltas, when present, solve this naturally.
+5. **Time to first token differs.** GLM models can think for many seconds before emitting the first content token, and `max_tokens` covers reasoning tokens as well (see docs/PROVIDER-NOTES.md section 3). The UI **MUST NOT** treat a silent stream as stalled before the per-call timeout. Reasoning deltas, when present, solve this naturally.
 
 ### 8.4 Model assignment
 
@@ -653,17 +651,17 @@ Locked default assignment, editable per seat on `/agents`:
 
 | Seat | Provider | Model | Reasoning |
 |---|---|---|---|
-| Me Agent | deepseek | `deepseek-reasoner` | enabled |
-| The Pragmatist | deepseek | `deepseek-chat` | off |
-| The Technical Architect | deepseek | `deepseek-chat` | off |
-| The Contrarian | deepseek | `deepseek-chat` | off |
-| The Wildcard | glm | `glm-4.6` | off |
-| The Mentor | glm | `glm-4.6` | off |
-| The Market Analyst | glm | `glm-4.6` | off |
-| The Trend-Watcher | glm | `glm-4.6` | off |
-| Reveal synthesis | deepseek | `deepseek-reasoner` | enabled |
+| Me Agent | glm | `glm-5.3-flash` | hinted (always on) |
+| The Pragmatist | glm | `glm-5.3-flash` | hinted (always on) |
+| The Technical Architect | glm | `glm-5.3-flash` | hinted (always on) |
+| The Contrarian | glm | `glm-5.3-flash` | hinted (always on) |
+| The Wildcard | glm | `glm-5.3-flash` | hinted (always on) |
+| The Mentor | glm | `glm-5.3-flash` | hinted (always on) |
+| The Market Analyst | glm | `glm-5.3-flash` | hinted (always on) |
+| The Trend-Watcher | glm | `glm-5.3-flash` | hinted (always on) |
+| Reveal synthesis | glm | `glm-5.3-flash` | hinted (always on) |
 
-Verify the exact model identifiers against each provider's current documentation before first run; see Appendix C.
+Owner change, 2026-09-11: DeepSeek was removed and every seat runs on GLM, per docs/PROVIDER-NOTES.md section 1. GLM cannot disable thinking, so the reasoning column reflects reality: every seat reasons, and the adapter adds reasoning headroom to `max_tokens`. Verify the exact model identifiers against the provider's current documentation before first run; see Appendix C.
 
 ---
 
@@ -1274,14 +1272,14 @@ Five states, driven by the run reducer, never by local component state.
 
 | Seat | Dark theme hex | Light theme hex | Rationale |
 |---|---|---|---|
-| Me Agent | `#F0B429` | `#B45309` | Gold. The only warm-metal colour at the table, so the user's seat is unmistakable |
-| The Pragmatist | `#4ECDC4` | `#0F766E` | Cool teal, calm and grounded |
+| Me Agent | `#F0B429` | `#8A4308` | Gold. The only warm-metal colour at the table, so the user's seat is unmistakable |
+| The Pragmatist | `#4ECDC4` | `#0A5A54` | Cool teal, calm and grounded |
 | The Wildcard | `#E879F9` | `#A21CAF` | Magenta. Highest chroma on the table, for the loudest seat |
-| The Market Analyst | `#4ADE80` | `#15803D` | Green, the universal money colour |
+| The Market Analyst | `#4ADE80` | `#0F6130` | Green, the universal money colour |
 | The Technical Architect | `#60A5FA` | `#1D4ED8` | Blue, structural and neutral |
 | The Contrarian | `#F87171` | `#B91C1C` | Red. Reserved for the seat that attacks |
 | The Mentor | `#A78BFA` | `#6D28D9` | Violet, senior and steady |
-| The Trend-Watcher | `#22D3EE` | `#0E7490` | Cyan, the only near-neighbour of teal, placed adjacent on purpose so the two read as a related pair |
+| The Trend-Watcher | `#22D3EE` | `#0A5F78` | Cyan, the only near-neighbour of teal, placed adjacent on purpose so the two read as a related pair |
 
 Every accent **MUST** clear a 3:1 contrast ratio against the table surface in its theme for the ring and glow, and 4.5:1 for any text drawn in it. Verify with a contrast checker before shipping; adjust lightness, never hue, if a value fails.
 
@@ -1501,14 +1499,14 @@ Two complete themes ship. Both are first-class: they are two token sets behind o
   --rim-hi:        #FFF6E6;
   --rim-lo:        #6B5433;
 
-  --seat-1: #B45309;
-  --seat-2: #0F766E;
+  --seat-1: #8A4308;
+  --seat-2: #0A5A54;
   --seat-3: #A21CAF;
-  --seat-4: #15803D;
+  --seat-4: #0F6130;
   --seat-5: #1D4ED8;
   --seat-6: #B91C1C;
   --seat-7: #6D28D9;
-  --seat-8: #0E7490;
+  --seat-8: #0A5F78;
 
   --grid: rgba(60, 40, 20, 0.045);
 }
@@ -1615,7 +1613,7 @@ If two attempts at a call fail schema validation, the task fails with `Structure
 
 ### 17.5 Provider outage
 
-The seat-level design makes this survivable by construction: an all-DeepSeek outage still leaves five GLM seats plus the Me Agent's fallback, and the run completes with a note in the reveal payload listing the failed seats. The engine **MUST NOT** abort a run merely because one provider is down.
+The seat-level design makes this survivable by construction: seats whose calls fail are recorded and skipped, and the run completes with a note in the reveal payload listing the failed seats. The engine **MUST NOT** abort a run merely because one seat (or the single provider) is erroring on some calls. With one provider, a total outage fails the run honestly; partial failures degrade.
 
 ### 17.6 Process restart
 
@@ -1666,7 +1664,7 @@ Two layers, both required. No browser automation in v1.
 | `merge.ts` | Locked and manual items survive regeneration; matched generated items update in place; removed generated items are hidden, not deleted |
 | `summary.ts` | Output is deterministic; `author_brief` stays under 400 words |
 | Export | Markdown contains every required section; JSON round-trips against the schema |
-| Provider adapter | Recorded fixtures for a DeepSeek reasoning stream and a GLM stream, asserting reasoning and text deltas are classified correctly |
+| Provider adapter | Recorded fixtures for a GLM reasoning stream, asserting reasoning and text deltas are classified correctly |
 
 ### 19.2 Integration tests (`src/test/integration`)
 
@@ -1680,7 +1678,7 @@ Two layers, both required. No browser automation in v1.
 | Budget abort | Status `failed` with `BUDGET_EXCEEDED`; the partial run is browsable; no call is made after the limit |
 | Seat failure | One seat's every call fails; the run still completes; the failed seat appears in the reveal payload |
 | Structured output failure | Two bad responses for one seat degrade that seat only |
-| Provider outage | All DeepSeek seats failing still yields a completed run |
+| Provider outage | All seats on a provider failing still yields a completed run (via `failSeats` failure injection) |
 | Contract | Each route handler rejects an invalid body with 400 and a typed error code |
 | Replay | Replaying a completed run makes zero adapter calls and produces an identical reducer state |
 
@@ -1736,9 +1734,9 @@ Build the whole loop before wiring real models.
 
 ### M5 — Real agents wired in
 
-**Deliverables:** `OpenAICompatibleAdapter`, registry, provider-quirk handling, pricing table, real DeepSeek and GLM routing, tuned lens prompts, Tavily search for the Trend-Watcher, reveal synthesis.
+**Deliverables:** `OpenAICompatibleAdapter`, registry, provider-quirk handling, pricing table, real GLM routing, tuned lens prompts, Tavily search for the Trend-Watcher, reveal synthesis.
 
-**Acceptance:** `pnpm smoke` completes a real run with all eight seats producing distinct, non-redundant output. Reasoning from the DeepSeek seat appears in the drawer and not in the speech bubble. The Trend-Watcher's critiques reference actual search results. Two runs on different seeds produce materially different idea sets.
+**Acceptance:** `pnpm smoke` completes a real run with all eight seats producing distinct, non-redundant output. Reasoning from a seat appears in the drawer and not in the speech bubble. The Trend-Watcher's critiques reference actual search results. Two runs on different seeds produce materially different idea sets.
 
 ### M6 — Reveal card, history, replay, export, compare
 
@@ -1757,7 +1755,7 @@ All six milestones merged. `pnpm typecheck`, `pnpm lint`, and `pnpm test` clean.
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
 | Agents converge on similar ideas, debate becomes noise | High | High | Distinct, sharply differentiated lens prompts with explicit anti-overlap instruction; `distinctness` metric stored per run so drift is measurable, not guessed; tuning pass in M5 |
-| DeepSeek reasoning latency makes a step feel frozen | Medium | Medium | Reasoning deltas stream immediately, so the seat shows thinking within a second; 90-second timeout; per-seat provider split means GLM seats finish early and keep the table lively |
+| Reasoning-model latency makes a step feel frozen | Medium | Medium | Reasoning deltas stream immediately, so the seat shows thinking within a second; 90-second timeout; the staggered reveal keeps the table lively while seats finish |
 | Reasoning models ignore the JSON schema | Medium | Medium | `json.ts` extraction plus one repair retry; per-task failure isolation; reveal has a deterministic fallback |
 | Cost creep from a large proposal set | Medium | Medium | Vote and debate are one call per agent, not one per target; refine is capped at four seats; hard budget abort checked before dispatch |
 | SQLite write contention across eight parallel writers | Low | Medium | WAL mode; task completion writes are single short transactions; deltas are coalesced and never written per token |
@@ -1996,8 +1994,8 @@ Verify these against live provider documentation as the first action of mileston
 
 | Assumption | Verify | Fallback if wrong |
 |---|---|---|
-| DeepSeek chat and reasoning models are served at an OpenAI-compatible `/chat/completions` under `https://api.deepseek.com/v1` | Send one request and inspect the shape | Adjust `DEEPSEEK_BASE_URL`; the adapter is the only place that changes |
-| DeepSeek reasoning models expose a reasoning channel field on streaming deltas | Log one raw delta during M5 | If absent, the reasoning drawer falls back to showing answer text with a note |
+| DeepSeek chat and reasoning models are served at an OpenAI-compatible `/chat/completions` under `https://api.deepseek.com/v1` | — | **Removed by owner decision, 2026-09-11.** Round Table is GLM-only; see docs/PROVIDER-NOTES.md section 8 for the retired integration record |
+| DeepSeek reasoning models expose a reasoning channel field on streaming deltas | — | **Removed.** GLM exposes the same `reasoning_content` field |
 | GLM chat completions are served under `https://open.bigmodel.cn/api/paas/v4` with Bearer auth | Send one request and inspect the shape | Adjust `GLM_BASE_URL` |
 | GLM model identifiers and the thinking-mode parameter name | Provider docs | Update `agents.model_id` rows via `/agents` or the seed script; no code change |
 | Both providers return token usage on streaming responses | Inspect one streamed response | The adapter's character-based estimate keeps the budget guard functional |
