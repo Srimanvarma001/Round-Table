@@ -16,7 +16,10 @@ const NAV = [
 
 /**
  * Chrome around every page. The theme is applied to <html data-theme> so both
- * theme token sets swap with a single attribute (section 16.8).
+ * theme token sets swap with a single attribute.
+ *
+ * Fixed-height control room: root is exactly 100dvh with overflow hidden, the
+ * header takes its natural 56px, and main fills the rest with no page scroll.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,13 +30,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <div className="themed-grid flex min-h-full flex-col">
-      <header className="sticky top-0 z-40 border-b border-[var(--line)] bg-[var(--bg-elev-1)]/92 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-6 px-6">
+    <div className="backroom themed-grid flex h-[100dvh] flex-col overflow-hidden">
+      <header className="z-40 h-14 shrink-0 border-b border-[var(--line)] bg-[var(--bg-elev-1)]/95 backdrop-blur">
+        <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-5 px-4">
           <Link href="/run" className="display-face flex items-center gap-2 text-[var(--text)]">
-            {/* Eight ticks around a ring: the product mark, echoing the table. */}
+            {/* Eight chips around a ring: the product mark, echoing the table. */}
             <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-              <circle cx="10" cy="10" r="7" fill="none" stroke="var(--line-strong)" strokeWidth="1" />
+              <circle cx="10" cy="10" r="7" fill="none" stroke="var(--line-strong)" strokeWidth="1.5" />
               {Array.from({ length: 8 }, (_, i) => {
                 const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
                 return (
@@ -47,10 +50,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 );
               })}
             </svg>
-            <span className="text-[15px] font-semibold tracking-tight">Round Table</span>
+            <span className="text-[16px] font-semibold tracking-tight">Round Table</span>
           </Link>
 
-          <nav className="flex items-center gap-1" aria-label="Main">
+          <nav className="flex items-center gap-0.5" aria-label="Main">
             {NAV.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
@@ -59,9 +62,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={[
-                    'rounded-lg px-3 py-1.5 text-[13px] transition-colors',
+                    'rounded-lg px-2.5 py-1.5 text-[13px] transition-colors',
                     active
-                      ? 'bg-[var(--bg-elev-3)] text-[var(--text)]'
+                      ? 'bg-[var(--gold)]/15 text-[var(--gold-hi)]'
                       : 'text-[var(--text-dim)] hover:bg-[var(--bg-elev-2)] hover:text-[var(--text)]',
                   ].join(' ')}
                 >
@@ -70,10 +73,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+
+          <p className="display-face ml-auto hidden text-[13px] italic text-[var(--text-mute)] lg:block">
+            The backroom is in session
+          </p>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[1600px] flex-1 px-6 py-6">{children}</main>
+      <main className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col overflow-hidden px-4 py-2">
+        {children}
+      </main>
     </div>
   );
 }

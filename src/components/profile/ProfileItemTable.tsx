@@ -248,7 +248,7 @@ function ItemRow({
             }
             disabled={busy}
             onClick={() => onPatch(item.id, { locked: !item.locked })}
-            className={item.locked ? 'text-[var(--seat-5)]' : undefined}
+            className={item.locked ? 'text-[var(--gold)]' : undefined}
           >
             {item.locked ? <Lock className="h-3.5 w-3.5" /> : <Unlock className="h-3.5 w-3.5" />}
           </Button>

@@ -101,7 +101,8 @@
   .animate-reveal-ripple,
   .animate-rim-breathe,
   .animate-typewriter,
-  .animate-soft-pulse {
+  .animate-soft-pulse,
+  .animate-smoke-drift {
     animation: none !important;
   }
 

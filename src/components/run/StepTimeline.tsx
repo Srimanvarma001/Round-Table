@@ -5,11 +5,13 @@ import { Check, Minus } from 'lucide-react';
 import { STEP_NAMES, type StepName } from '@/shared/constants';
 
 /**
- * The five-node step timeline, section 15.3 and the centre-column spec of
- * section 16.7.
+ * The five-node step tracker: a cigar-band strip, not pill buttons.
  *
- * State is never encoded in colour alone: each node carries a text label and,
- * where relevant, an icon (section 16.12).
+ * Steps are genuinely sequential (propose, debate, refine, vote, reveal) so
+ * numbered markers are legitimate rather than decorative. Active step fills
+ * gold with a soft glow; completed steps carry a dim gold outline with a
+ * check; skipped show a dash; upcoming stay muted. State is never encoded in
+ * colour alone: each node carries its label and an icon where relevant.
  */
 
 export interface StepTimelineProps {
@@ -27,7 +29,11 @@ export function StepTimeline({
   onSeek,
 }: StepTimelineProps) {
   return (
-    <ol className="flex items-center gap-1" aria-label="Run steps">
+    <ol
+      aria-label="Run steps"
+      className="flex items-stretch gap-0 overflow-hidden rounded-[var(--radius-pill)] border border-[var(--line-strong)] bg-[var(--recess-bg)]"
+      style={{ boxShadow: 'var(--recess-shadow)' }}
+    >
       {STEP_NAMES.map((name, i) => {
         const skipped = skippedSteps.includes(name);
         const complete = completedSteps.includes(name);
@@ -42,43 +48,51 @@ export function StepTimeline({
               : 'pending';
 
         return (
-          <li key={name} className="flex items-center gap-1">
-            {i > 0 ? (
-              <span
-                aria-hidden="true"
-                className="h-px w-4"
-                style={{ background: complete || active ? 'var(--line-strong)' : 'var(--line)' }}
-              />
-            ) : null}
+          <li key={name} className="flex items-stretch">
+            {i > 0 ? <span aria-hidden="true" className="w-px self-stretch bg-[var(--line)]" /> : null}
             <button
               type="button"
               onClick={onSeek ? () => onSeek(name) : undefined}
               disabled={!onSeek}
               aria-current={active ? 'step' : undefined}
               className={[
-                'flex items-center gap-1.5 rounded-[var(--radius-pill)] border px-2.5 py-1',
-                'text-[11px] transition-colors',
-                onSeek ? 'cursor-pointer hover:border-[var(--line-strong)]' : 'cursor-default',
+                'flex items-center gap-1.5 px-2.5 py-1 text-[11.5px] transition-colors',
+                onSeek ? 'cursor-pointer' : 'cursor-default',
                 active
-                  ? 'border-[var(--seat-5)] bg-[var(--seat-5)]/10 text-[var(--text)]'
+                  ? 'bg-[var(--gold)] font-semibold text-[var(--bg)]'
                   : complete
-                    ? 'border-[var(--line-strong)] text-[var(--text-dim)]'
+                    ? 'text-[var(--gold-hi)]'
                     : skipped
-                      ? 'border-[var(--line)] text-[var(--text-mute)]'
-                      : 'border-[var(--line)] text-[var(--text-mute)]',
+                      ? 'text-[var(--text-mute)]'
+                      : 'text-[var(--text-mute)]',
               ].join(' ')}
+              style={
+                active
+                  ? { boxShadow: '0 0 14px rgba(201,151,63,0.45)' }
+                  : undefined
+              }
+              title={`Step ${i + 1} of ${STEP_NAMES.length}, ${name}, ${status}`}
             >
-              <span className="step-label">{name}</span>
-              {complete ? (
-                <Check className="h-3 w-3 text-[var(--ok)]" aria-label="complete" />
-              ) : skipped ? (
-                <Minus className="h-3 w-3" aria-label="skipped" />
-              ) : active ? (
-                <span
-                  className="h-1.5 w-1.5 rounded-[var(--radius-pill)] bg-[var(--seat-5)]"
-                  aria-label="in progress"
-                />
-              ) : null}
+              <span
+                aria-hidden="true"
+                className={[
+                  'tnum flex h-4 w-4 items-center justify-center rounded-[var(--radius-pill)] border text-[10px] font-semibold',
+                  active
+                    ? 'border-[var(--bg)]/40 text-[var(--bg)]'
+                    : complete
+                      ? 'border-[var(--gold)]/50 text-[var(--gold-hi)]'
+                      : 'border-[var(--line-strong)] text-[var(--text-mute)]',
+                ].join(' ')}
+              >
+                {complete ? (
+                  <Check className="h-2.5 w-2.5" aria-label="complete" />
+                ) : skipped ? (
+                  <Minus className="h-2.5 w-2.5" aria-label="skipped" />
+                ) : (
+                  i + 1
+                )}
+              </span>
+              <span className="capitalize">{name}</span>
               <span className="sr-only-live">{status}</span>
             </button>
           </li>

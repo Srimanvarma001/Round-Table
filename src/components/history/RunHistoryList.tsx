@@ -154,7 +154,7 @@ export function RunHistoryList({
                       <Link
                         href={`/runs/${run.id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="block truncate text-[13px] text-[var(--text)] hover:text-[var(--seat-5)]"
+                        className="block truncate text-[13px] text-[var(--text)] hover:text-[var(--gold-hi)]"
                       >
                         {truncate(run.seedPrompt, 110)}
                       </Link>

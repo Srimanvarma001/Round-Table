@@ -80,7 +80,7 @@ export const agents = sqliteTable(
       .default('dicebear'),
     avatarSeed: text('avatar_seed').notNull().default(''),
     avatarSvgCache: text('avatar_svg_cache'),
-    accentColor: text('accent_color').notNull().default('#60A5FA'),
+    accentColor: text('accent_color').notNull().default('#C9973F'),
     accentToken: text('accent_token').notNull().default('--seat-5'),
     iconName: text('icon_name').notNull().default('user-round'),
     enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),

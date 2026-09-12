@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button';
 import type { ControlState } from '@/hooks/useRunStream';
 
 /**
- * Controls, section 15.3: Generate, Stop, Resume, Abort — a single primary
- * action reflecting the run status.
+ * Controls: Generate, Stop, Resume, Abort — a single primary action
+ * reflecting the run status.
  *
- * The Stop button PAUSES. Section 11.4 is precise about this: it sets a flag
- * and returns immediately, in-flight calls run to completion and persist
- * normally, and resuming re-enters the same step filtering out task keys that
- * already exist. It is not an abort, and a half-finished critique is worse than
- * a slow stop.
+ * The prompt field is recessed like a chip tray (inset shadow, dark surface,
+ * gold focus ring). Generate is solid gold with dark text. Stop pauses and
+ * renders as a blood-red outline while a run is live.
  */
 
 export interface ControlsProps {
@@ -49,7 +47,7 @@ export function Controls({
   const idle = controls === 'idle' || controls === 'done' || controls === 'error';
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
         <input
           value={seedPrompt}
@@ -57,8 +55,8 @@ export function Controls({
           placeholder="What should the table think about?"
           aria-label="Seed prompt"
           disabled={!idle}
-          className="h-9 flex-1 rounded-lg border border-[var(--line)] bg-[var(--bg-elev-3)] px-3
-                     text-[13px] text-[var(--text)] placeholder:text-[var(--text-mute)]
+          className="recessed h-9 flex-1 rounded-lg px-3 text-[13px]
+                     text-[var(--text)] placeholder:text-[var(--text-mute)]
                      disabled:opacity-60"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && idle && seedPrompt.trim()) onGenerate();
@@ -77,7 +75,7 @@ export function Controls({
           </Button>
         ) : controls === 'running' ? (
           <>
-            <Button variant="secondary" size="md" onClick={onPause}>
+            <Button variant="stop" size="md" onClick={onPause}>
               <Pause className="h-3.5 w-3.5" />
               Stop
             </Button>
@@ -103,9 +101,8 @@ export function Controls({
           </Button>
         )}
 
-        {/* Section 16.10 rule 8: a "skip animation" control on the table flushes
-            everything immediately, for when the user wants the result rather
-            than the show. */}
+        {/* A skip control flushes buffered text for users who want the result
+            rather than the show. */}
         {buffered ? (
           <Button variant="ghost" size="md" onClick={onSkipAnimation} title="Flush buffered text">
             <Zap className="h-3.5 w-3.5" />
@@ -114,13 +111,13 @@ export function Controls({
         ) : null}
       </div>
 
-      <label className="flex items-center gap-2 text-[11.5px] text-[var(--text-mute)]">
+      <label className="flex items-center gap-2 text-[11px] text-[var(--text-mute)]">
         <input
           type="checkbox"
           checked={refineEnabled}
           onChange={(e) => onRefineChange(e.target.checked)}
           disabled={!idle}
-          className="accent-[var(--seat-5)]"
+          className="accent-[var(--gold)]"
         />
         Run the refine step (skipped automatically when no proposal drew a critique)
       </label>

@@ -8,22 +8,18 @@ import { RevealCard } from '@/components/run/RevealCard';
 import { StepTimeline } from '@/components/run/StepTimeline';
 import { RoundTable } from '@/components/table/RoundTable';
 import { Badge } from '@/components/ui/badge';
-import { Panel } from '@/components/ui/card';
 import { useAgents } from '@/hooks/useAgents';
 import { useRunStream } from '@/hooks/useRunStream';
 import { useSettings } from '@/hooks/useSettings';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { formatUsd } from '@/lib/utils';
-import { STEP_NAMES } from '@/shared/constants';
-import type { DissentRow, PartialScore, RevealPayload, RunMetrics } from '@/shared/events';
+import type { DissentRow, RevealPayload, RunMetrics } from '@/shared/events';
 import type { ProposalScoreDTO } from '@/shared/types';
 
 /**
- * The live table, section 15.1. Default landing page.
- *
- * One reducer for the live run, fed by the SSE hook (section 15.2). The client
- * NEVER computes weighted scores during a live run: it renders the
- * `partial_scores` the server includes in vote-step events.
+ * The live table. Dense single-viewport control room: this root never grows
+ * past its parent and never scrolls the page. Header and control bar take
+ * their natural height; the table area fills the rest via flex-grow.
  */
 
 export default function RunPage() {
@@ -44,7 +40,7 @@ export default function RunPage() {
 
   const agentOrder = useMemo(() => agents.map((a) => a.id), [agents]);
 
-  // Section 16.12: `prefers-reduced-motion` drops the stagger cadence to zero.
+  // `prefers-reduced-motion` drops the stagger cadence to zero.
   const cadence = reducedMotion ? 0 : settings.staggerCadenceMs;
 
   const { state, seats, controls, activeSeats, flushAll } = useRunStream({
@@ -134,17 +130,22 @@ export default function RunPage() {
     [state.stepSummary, state.partialScores],
   );
 
-  const winner = state.reveal;
+  const winner: RevealPayload | null = state.reveal;
+  const showReveal = Boolean(winner || state.status === 'failed' || state.status === 'aborted');
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex h-full min-h-0 flex-col gap-2 overflow-hidden">
       {/* Polite live region: a screen-reader user is not dependent on watching
-          the table (section 16.12). */}
+          the table. */}
       <p aria-live="polite" className="sr-only-live">
         {`Step ${state.step}. ${winner ? `Winner: ${winner.title}` : ''}`}
       </p>
 
-      <Panel className="flex flex-col gap-4 px-5 py-4">
+      {/* Control bar: prompt input plus step strip. Fixed natural height. */}
+      <section
+        aria-label="Run controls"
+        className="flex shrink-0 flex-col gap-2 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--bg-elev-1)] px-3 py-2"
+      >
         <Controls
           controls={controls}
           seedPrompt={seedPrompt}
@@ -160,82 +161,98 @@ export default function RunPage() {
           buffered={activeSeats.length > 0}
         />
 
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--line)] pt-3">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--line)] pt-1.5">
           <StepTimeline step={state.step} completedSteps={state.completedSteps} />
 
-          <div className="tnum ml-auto flex items-center gap-3 text-[11.5px] text-[var(--text-mute)]">
-            <span>{state.round > 1 ? `round ${state.round}` : ''}</span>
-            <span>{state.failedSeats.length > 0 ? `${state.failedSeats.length} failed` : ''}</span>
-            {winner ? <Badge tone="ok">winner: {winner.title}</Badge> : null}
+          <div className="tnum ml-auto flex items-center gap-2 text-[11px] text-[var(--text-mute)]">
+            {state.round > 1 ? <span>Round {state.round}</span> : null}
+            {state.failedSeats.length > 0 ? <span>{state.failedSeats.length} failed</span> : null}
+            {winner ? <Badge tone="accent">Winner, {winner.title}</Badge> : null}
           </div>
         </div>
-      </Panel>
+      </section>
 
+      {/* Inline status strip: single line, never pushes the table off screen. */}
       {state.budgetWarning ? (
-        <div
+        <p
           role="status"
-          className="flex items-center gap-2 rounded-[var(--radius-card)] border border-[var(--warn)]/40
-                     bg-[var(--warn)]/10 px-3 py-2 text-[12.5px] text-[var(--warn)]"
+          className="shrink-0 truncate rounded-[var(--radius-card)] border border-[var(--warn)]/40
+                     bg-[var(--warn)]/10 px-2.5 py-1 text-[11.5px] text-[var(--warn)]"
         >
-          Budget warning: {formatUsd(state.budgetWarning.usedUsd)} of{' '}
+          Budget warning, {formatUsd(state.budgetWarning.usedUsd)} of{' '}
           {formatUsd(state.budgetWarning.limitUsd)} used (
-          {Math.round(state.budgetWarning.pct * 100)}%). Completed artefacts are preserved if the
-          run aborts.
-        </div>
+          {Math.round(state.budgetWarning.pct * 100)}%). Completed work is kept if the run
+          aborts.
+        </p>
       ) : null}
 
       {state.error && state.status === 'failed' ? (
-        <div
+        <p
           role="alert"
-          className="rounded-[var(--radius-card)] border border-[var(--danger)]/40 bg-[var(--danger)]/10
-                     px-3 py-2 text-[12.5px] text-[var(--danger)]"
+          className="shrink-0 truncate rounded-[var(--radius-card)] border border-[var(--danger)]/40 bg-[var(--danger)]/10
+                     px-2.5 py-1 text-[11.5px] text-[var(--danger)]"
         >
           Run failed ({state.error.code}): {state.error.message}
-        </div>
+        </p>
       ) : null}
 
       {state.status === 'paused' ? (
-        <div
+        <p
           role="status"
-          className="rounded-[var(--radius-card)] border border-[var(--line-strong)] bg-[var(--bg-elev-2)]
-                     px-3 py-2 text-[12.5px] text-[var(--text-dim)]"
+          className="shrink-0 truncate rounded-[var(--radius-card)] border border-[var(--line-strong)] bg-[var(--bg-elev-2)]
+                     px-2.5 py-1 text-[11.5px] text-[var(--text-dim)]"
         >
-          Paused. {state.pendingTaskKeys.length} task
-          {state.pendingTaskKeys.length === 1 ? '' : 's'} still pending. Resume continues from the
-          next pending task — completed work is never re-requested.
-        </div>
+          Paused. {state.pendingTaskKeys.length} pending. Resume continues without redoing
+          completed work.
+        </p>
       ) : null}
 
-      {isLoading ? (
-        <Panel className="flex h-[60vh] items-center justify-center">
-          <p className="text-[13px] text-[var(--text-mute)]">Loading the table…</p>
-        </Panel>
-      ) : (
-        <RoundTable
-          agents={agents}
-          normalisedWeights={normalisedWeights}
-          seats={seats}
-          activeSeats={activeSeats}
-          step={state.step}
-          proposalCount={proposalCount}
-          refiningSeatNames={refiningSeatNames}
-          partialScores={state.partialScores}
-          reveal={winner}
-          reducedMotion={reducedMotion}
-          drawerAgentId={drawerAgentId}
-          onOpenDrawer={setDrawerAgentId}
-        />
-      )}
+      {/* Table area: fills every remaining pixel. The table is the dominant
+          element on screen; seats sit on its edge, not floating apart. */}
+      <section
+        aria-label="Round table"
+        className="backroom-vignette relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--bg-elev-1)]"
+      >
+        {isLoading ? (
+          <div className="flex flex-1 items-center justify-center">
+            <p className="text-[13px] text-[var(--text-mute)]">Loading the table…</p>
+          </div>
+        ) : (
+          <div className="flex min-h-0 flex-1 flex-col">
+            <RoundTable
+              agents={agents}
+              normalisedWeights={normalisedWeights}
+              seats={seats}
+              activeSeats={activeSeats}
+              step={state.step}
+              proposalCount={proposalCount}
+              refiningSeatNames={refiningSeatNames}
+              partialScores={state.partialScores}
+              reveal={winner}
+              reducedMotion={reducedMotion}
+              drawerAgentId={drawerAgentId}
+              onOpenDrawer={setDrawerAgentId}
+            />
+          </div>
+        )}
 
-      {winner || state.status === 'failed' || state.status === 'aborted' ? (
-        <RevealCard
-          reveal={winner}
-          metrics={state.metrics ?? detail.metrics}
-          scores={detail.scores}
-          dissent={detail.dissent}
-          failedSeats={state.failedSeats.map((f) => ({ seatName: seatName(f.agentId) }))}
-        />
-      ) : null}
+        {/* Reveal overlays the table corner instead of pushing the page longer,
+            so the single-viewport constraint holds on completed runs too. */}
+        {showReveal ? (
+          <div className="absolute bottom-2 right-2 top-2 z-40 flex w-[min(340px,38%)] min-h-0 flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--gold)]/30 bg-[var(--bg-elev-1)]/96 shadow-[var(--elev-3)] backdrop-blur">
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <RevealCard
+                reveal={winner}
+                metrics={state.metrics ?? detail.metrics}
+                scores={detail.scores}
+                dissent={detail.dissent}
+                failedSeats={state.failedSeats.map((f) => ({ seatName: seatName(f.agentId) }))}
+                compact
+              />
+            </div>
+          </div>
+        ) : null}
+      </section>
 
       <ReasoningDrawer
         agents={agents}
@@ -243,7 +260,7 @@ export default function RunPage() {
         openAgentId={drawerAgentId}
         onClose={() => setDrawerAgentId(null)}
         onClosed={(agentId) => {
-          // Focus returns to the seat that opened the drawer (section 16.12).
+          // Focus returns to the seat that opened the drawer.
           const el = document.querySelector<HTMLButtonElement>(
             `[aria-label^="${CSS.escape(seatName(agentId))}"]`,
           );

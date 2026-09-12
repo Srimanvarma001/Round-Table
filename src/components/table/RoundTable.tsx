@@ -13,7 +13,6 @@ import { placeSeats } from '@/lib/layout/seats';
 import type { PartialScore, RevealPayload } from '@/shared/events';
 import type { StepName } from '@/shared/constants';
 import type { AgentDTO } from '@/shared/types';
-import { TABLE_ASPECT } from '@/shared/constants';
 
 /**
  * The round table, section 16.1 and section 15.3.
@@ -92,25 +91,25 @@ export function RoundTable({
 
   if (compact) {
     return (
-      <SeatStack
-        agents={agents}
-        normalisedWeights={normalisedWeights}
-        seats={seats}
-        activeSet={activeSet}
-        reducedMotion={reducedMotion}
-        onOpenDrawer={onOpenDrawer}
-        registerRef={registerRef}
-      />
+      <div ref={containerRef} className="min-h-0 flex-1 overflow-y-auto p-2">
+        <SeatStack
+          agents={agents}
+          normalisedWeights={normalisedWeights}
+          seats={seats}
+          activeSet={activeSet}
+          reducedMotion={reducedMotion}
+          onOpenDrawer={onOpenDrawer}
+          registerRef={registerRef}
+        />
+      </div>
     );
   }
 
   return (
     <LayoutGroup>
-      <div
-        ref={containerRef}
-        className="relative mx-auto w-full"
-        style={{ aspectRatio: String(TABLE_ASPECT), maxHeight: '78vh' }}
-      >
+      {/* Fills the flex-grow table area from the page; no fixed pixel or vh
+          heights here so smaller laptop viewports cannot overflow. */}
+      <div ref={containerRef} className="relative mx-auto h-full min-h-0 w-full flex-1">
         {metrics.showTableSurface ? <TableSurface step={step} /> : null}
 
         <CenterPlinth

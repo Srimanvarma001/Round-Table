@@ -46,7 +46,7 @@ export function SeatGrid({ agents, normalised, selectedId, dirtyIds, onSelect }:
               className={cn(
                 'flex w-full items-center gap-3 rounded-[var(--radius-card)] border px-3 py-2.5 text-left transition-colors',
                 selected
-                  ? 'border-[var(--seat-5)] bg-[var(--bg-elev-2)]'
+                  ? 'border-[var(--gold)] bg-[var(--bg-elev-2)]'
                   : 'border-[var(--line)] bg-[var(--bg-elev-2)] hover:border-[var(--line-strong)]',
               )}
             >
@@ -90,7 +90,7 @@ export function SeatGrid({ agents, normalised, selectedId, dirtyIds, onSelect }:
 
                 <span className="mt-0.5 flex items-center gap-2">
                   <span className="tnum text-[11px] text-[var(--text-mute)]">
-                    {agent.provider} · {agent.modelId}
+                    {agent.provider}, {agent.modelId}
                   </span>
                 </span>
               </span>

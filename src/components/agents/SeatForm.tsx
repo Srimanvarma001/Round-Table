@@ -266,7 +266,7 @@ export function SeatForm({
                 className={cn(
                   'flex items-center gap-2 rounded-[var(--radius-card)] border px-3 py-2 text-[12.5px] transition-colors',
                   draft.avatarStyle === style
-                    ? 'border-[var(--seat-5)] bg-[var(--bg-elev-3)] text-[var(--text)]'
+                    ? 'border-[var(--gold)] bg-[var(--bg-elev-3)] text-[var(--text)]'
                     : 'border-[var(--line)] text-[var(--text-dim)] hover:border-[var(--line-strong)]',
                 )}
               >
@@ -327,7 +327,7 @@ export function SeatForm({
                   className={cn(
                     'flex h-8 items-center gap-2 rounded-[var(--radius-pill)] border px-2.5 text-[11.5px] transition-colors',
                     selected
-                      ? 'border-[var(--seat-5)] bg-[var(--bg-elev-3)] text-[var(--text)]'
+                      ? 'border-[var(--gold)] bg-[var(--bg-elev-3)] text-[var(--text)]'
                       : 'border-[var(--line)] text-[var(--text-dim)] hover:border-[var(--line-strong)]',
                   )}
                 >

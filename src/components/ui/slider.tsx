@@ -16,11 +16,11 @@ export const Slider = React.forwardRef<
     {...props}
   >
     <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-[var(--radius-pill)] bg-[var(--bg-elev-3)]">
-      <SliderPrimitive.Range className="absolute h-full bg-[var(--seat-5)]" />
+      <SliderPrimitive.Range className="absolute h-full bg-[var(--gold)]" />
     </SliderPrimitive.Track>
     <SliderPrimitive.Thumb
       className={cn(
-        'block h-4 w-4 rounded-[var(--radius-pill)] border-2 border-[var(--seat-5)]',
+        'block h-4 w-4 rounded-[var(--radius-pill)] border-2 border-[var(--gold)]',
         'bg-[var(--bg-elev-2)] transition-transform hover:scale-110',
       )}
     />
@@ -37,7 +37,7 @@ export const Switch = React.forwardRef<
     className={cn(
       'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-[var(--radius-pill)]',
       'border border-[var(--line)] transition-colors',
-      'data-[state=checked]:bg-[var(--seat-5)] data-[state=unchecked]:bg-[var(--bg-elev-3)]',
+      'data-[state=checked]:bg-[var(--gold)] data-[state=unchecked]:bg-[var(--bg-elev-3)]',
       'disabled:opacity-50',
       className,
     )}

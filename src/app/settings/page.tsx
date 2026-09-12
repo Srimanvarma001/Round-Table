@@ -103,7 +103,7 @@ export default function SettingsPage() {
                 <SelectContent>
                   {THEMES.map((t) => (
                     <SelectItem key={t} value={t}>
-                      {t === 'warroom' ? 'War room (dark, default)' : 'Hearth (light)'}
+                      {t === 'warroom' ? 'Backroom felt (dark, default)' : 'Mahogany (dark)'}
                     </SelectItem>
                   ))}
                 </SelectContent>

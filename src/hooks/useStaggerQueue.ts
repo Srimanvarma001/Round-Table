@@ -116,6 +116,11 @@ export function useStaggerQueue({
   }, [commit]);
 
   const reset = useCallback(() => {
+    // Idempotent: skipping the state commits when already empty breaks the
+    // reset -> render -> reset loop if a caller fires reset from an effect
+    // whose deps change every render (e.g. a fresh `order` array identity).
+    // It also avoids a wasted render on mount / StrictMode double-effects.
+    if (Object.keys(working.current).length === 0 && cursor.current === 0) return;
     working.current = {};
     cursor.current = 0;
     setBuffers({});

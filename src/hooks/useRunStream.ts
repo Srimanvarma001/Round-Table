@@ -318,12 +318,19 @@ export function useRunStream({
   const esRef = useRef<EventSource | null>(null);
   const staggerRef = useRef(stagger);
   staggerRef.current = stagger;
+  // `agentOrder` is often a fresh array identity every render (e.g. mapped
+  // from a query result upstream). Keep it in a ref so `resetRun` stays
+  // stable and the reset effect below only fires when `runId` changes.
+  // Otherwise: new array -> new callback -> effect re-runs -> setState ->
+  // re-render -> new array -> infinite "Maximum update depth exceeded".
+  const agentOrderRef = useRef(agentOrder);
+  agentOrderRef.current = agentOrder;
 
   const resetRun = useCallback(() => {
     eventsRef.current = [];
     staggerRef.current.reset();
-    dispatch({ type: 'reset', agentIds: agentOrder });
-  }, [agentOrder]);
+    dispatch({ type: 'reset', agentIds: agentOrderRef.current });
+  }, []);
 
   // Reset whenever the run changes.
   useEffect(() => {

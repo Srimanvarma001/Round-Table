@@ -21,30 +21,35 @@ export function SpeechBubble({
   take,
   accent,
   compact = false,
+  /** Seats in the bottom half flip the bubble above the disc so the fixed
+      viewport never clips it. */
+  above = false,
   onOpen,
 }: {
   take: string;
   accent: string;
   /** Below 1280px the bubble narrows to 9rem and clamps to one line. */
   compact?: boolean;
+  above?: boolean;
   onOpen?: () => void;
 }) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 8, scale: 0.96 }}
+      initial={{ opacity: 0, y: above ? -8 : 8, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 6, scale: 0.97 }}
+      exit={{ opacity: 0, y: above ? -6 : 6, scale: 0.97 }}
       transition={{ type: 'spring', stiffness: 320, damping: 26, mass: 0.7 }}
       onClick={onOpen}
       className={[
-        'absolute top-[calc(100%+10px)] left-1/2 -translate-x-1/2 rounded-[var(--radius-card)]',
-        'border border-[var(--line)] bg-[var(--bg-elev-2)] px-3 py-2',
+        'absolute left-1/2 z-30 -translate-x-1/2 rounded-[var(--radius-card)]',
+        above ? 'bottom-[calc(100%+8px)]' : 'top-[calc(100%+8px)]',
+        'border bg-[var(--bg-elev-1)] px-2.5 py-1.5',
         'leading-snug text-[var(--text-dim)]',
-        compact ? 'w-36 text-[12px]' : 'w-44 text-[12.5px]',
+        compact ? 'w-36 text-[11.5px]' : 'w-44 text-[12px]',
         onOpen ? 'cursor-pointer' : '',
       ].join(' ')}
-      style={{ borderColor: `${accent}44`, boxShadow: 'var(--elev-1)' }}
+      style={{ borderColor: `${accent}55`, boxShadow: 'var(--elev-2)' }}
     >
       {/* Plain text, never a motion child (section 16.13). The line clamp does
           the truncating so a long take fades out instead of breaking a word. */}

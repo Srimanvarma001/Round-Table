@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Theme tokens — section 16.8.
+   Theme tokens — backroom (mafia meeting) design system.
 
    This is the ONLY file in the codebase permitted to contain a hex literal.
    Every component colour is a `var(--token)` reference or a Tailwind utility
@@ -9,110 +9,134 @@
 
    Both sets are first-class: they define the SAME key list, so no component
    can reference a token that exists in one theme and not the other. The theme
-   token unit test asserts that.
+   token unit test asserts that, including 3:1 contrast of every seat accent
+   against --table-mid.
+
+   Palette: deep charcoal with warm undertone, whiskey-gold primary accent,
+   blood-red used sparingly. No cool blues anywhere. No pure black or white.
    =========================================================================== */
 
 :root,
 :root[data-theme='warroom'] {
   color-scheme: dark;
 
-  --bg: #08090b;
-  --bg-elev-1: #0f1115;
-  --bg-elev-2: #161920;
-  --bg-elev-3: #1d2129;
-  --line: #232833;
-  --line-strong: #303746;
-  --text: #e7eaf0;
-  --text-dim: #9aa3b2;
-  --text-mute: #6b7280;
-  --danger: #f87171;
-  --warn: #fbbf24;
-  --ok: #4ade80;
+  --bg: #0d0b08;
+  --bg-elev-1: #14110c;
+  --bg-elev-2: #1e1913;
+  --bg-elev-3: #26211a;
+  --line: #2a241c;
+  --line-strong: #453a2a;
+  --text: #ece6d9;
+  --text-dim: #b3a78f;
+  --text-mute: #8a8378;
+  --danger: #d3755a;
+  --warn: #c9973f;
+  --ok: #7fa37a;
 
-  /* table surface */
-  --table-core: #131a24;
-  --table-mid: #0e1219;
-  --table-edge: #090c11;
+  /* table surface — dark green felt: lit centre, dark warm edge */
+  --table-core: #233626;
+  --table-mid: #1e1913;
+  --table-edge: #0d0b08;
   --table-shadow: rgba(0, 0, 0, 0.78);
-  --table-pool: #1d4ed8;
-  --table-ring: #2a3341;
-  --rim-hi: #c9d4e6;
-  --rim-lo: #000000;
+  --table-pool: #c9973f;
+  --table-ring: #6b5a36;
+  --rim-hi: #e8d5a3;
+  --rim-lo: #0d0b08;
 
-  /* seat accents */
-  --seat-1: #f0b429; /* Me Agent */
-  --seat-2: #4ecdc4; /* Pragmatist */
-  --seat-3: #e879f9; /* Wildcard */
-  --seat-4: #4ade80; /* Market Analyst */
-  --seat-5: #60a5fa; /* Technical Architect */
-  --seat-6: #f87171; /* Contrarian */
-  --seat-7: #a78bfa; /* Mentor */
-  --seat-8: #22d3ee; /* Trend-Watcher */
+  /* seat accents — desaturated, warm-compatible, all 3:1 vs --table-mid */
+  --seat-1: #c9973f; /* You, whiskey gold */
+  --seat-2: #6b8f6b; /* Pragmatist, olive */
+  --seat-3: #8b5e3c; /* Wildcard, tobacco */
+  --seat-4: #6f9a9a; /* Market Analyst, slate teal (lightened, hue kept) */
+  --seat-5: #9c7c4a; /* Technical Architect, brass */
+  --seat-6: #b1503f; /* Contrarian, blood (lightened for legibility) */
+  --seat-7: #8577b0; /* Mentor, muted plum */
+  --seat-8: #a89a7e; /* Trend-Watcher, stone */
 
-  --grid: rgba(255, 255, 255, 0.022);
+  --gold: #c9973f;
+  --gold-hi: #e8d5a3;
+  --gold-deep: #9c7c4a;
+  --blood: #7a1f1f;
+  --recess-bg: #0f0d0a;
+  --denom-bg: #171310;
 
-  /* Elevation, section 16.9. In the war-room theme elevation reads mostly as
-     surface lightness with a soft black shadow underneath. */
-  --elev-1: 0 6px 18px rgba(0, 0, 0, 0.35);
-  --elev-2: 0 12px 32px rgba(0, 0, 0, 0.45);
-  --elev-3: 0 24px 64px rgba(0, 0, 0, 0.58);
+  --grid: rgba(201, 151, 63, 0.045);
+
+  /* Elevation reads as warm surface lightness plus soft black shadow. */
+  --elev-1: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --elev-2: 0 12px 32px rgba(0, 0, 0, 0.55);
+  --elev-3: 0 24px 64px rgba(0, 0, 0, 0.65);
+
+  /* Poker-chip emboss: outset drop + inset ring highlight. */
+  --chip-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.6);
+  --chip-inset: inset 0 1px 0 rgba(236, 230, 217, 0.22), inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+  --recess-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 -1px 0 rgba(236, 230, 217, 0.06);
 
   /* The table's own contact shadow colour, reused by seat auras. */
   --shadow-tint: 0, 0, 0;
 }
 
 :root[data-theme='hearth'] {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --bg: #f5efe4;
-  --bg-elev-1: #fbf7ef;
-  --bg-elev-2: #ffffff;
-  --bg-elev-3: #fffdf8;
-  --line: #e2d6c0;
-  --line-strong: #cfbe9f;
-  --text: #2b2118;
-  --text-dim: #6b5b45;
-  --text-mute: #8c7b62;
-  --danger: #b91c1c;
-  --warn: #92400e;
-  --ok: #15803d;
+  --bg: #120e0a;
+  --bg-elev-1: #1a1510;
+  --bg-elev-2: #241c14;
+  --bg-elev-3: #2e251a;
+  --line: #33291d;
+  --line-strong: #4f4130;
+  --text: #ece6d9;
+  --text-dim: #b3a78f;
+  --text-mute: #8a8378;
+  --danger: #d3755a;
+  --warn: #c9973f;
+  --ok: #7fa37a;
 
-  --table-core: #dcc9a8;
-  --table-mid: #c9b18c;
-  --table-edge: #b99a70;
-  --table-shadow: rgba(90, 70, 40, 0.32);
-  --table-pool: #f0b429;
-  --table-ring: #7a6242;
-  --rim-hi: #fff6e6;
-  --rim-lo: #6b5433;
+  /* aged mahogany variant — still a dark backroom, never cream */
+  --table-core: #2e2114;
+  --table-mid: #241c14;
+  --table-edge: #120e0a;
+  --table-shadow: rgba(0, 0, 0, 0.7);
+  --table-pool: #c9973f;
+  --table-ring: #6b5a36;
+  --rim-hi: #e8d5a3;
+  --rim-lo: #120e0a;
 
-  --seat-1: #8a4308;
-  --seat-2: #0a5a54;
-  --seat-3: #a21caf;
-  --seat-4: #0f6130;
-  --seat-5: #1d4ed8;
-  --seat-6: #b91c1c;
-  --seat-7: #6d28d9;
-  --seat-8: #0a5f78;
+  --seat-1: #c9973f;
+  --seat-2: #6b8f6b;
+  --seat-3: #8b5e3c;
+  --seat-4: #6f9a9a;
+  --seat-5: #9c7c4a;
+  --seat-6: #b1503f;
+  --seat-7: #8577b0;
+  --seat-8: #a89a7e;
 
-  --grid: rgba(60, 40, 20, 0.045);
+  --gold: #c9973f;
+  --gold-hi: #e8d5a3;
+  --gold-deep: #9c7c4a;
+  --blood: #7a1f1f;
+  --recess-bg: #15110c;
+  --denom-bg: #1b1611;
 
-  /* Stacking light surfaces reads as mud, so hearth expresses elevation
-     mostly through shadow with a warm tint. */
-  --elev-1: 0 4px 14px rgba(120, 95, 60, 0.14);
-  --elev-2: 0 10px 28px rgba(120, 95, 60, 0.18);
-  --elev-3: 0 20px 56px rgba(120, 95, 60, 0.24);
+  --grid: rgba(201, 151, 63, 0.05);
 
-  --shadow-tint: 120, 95, 60;
+  --elev-1: 0 6px 18px rgba(0, 0, 0, 0.45);
+  --elev-2: 0 10px 28px rgba(0, 0, 0, 0.55);
+  --elev-3: 0 20px 56px rgba(0, 0, 0, 0.65);
+
+  --chip-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.6);
+  --chip-inset: inset 0 1px 0 rgba(236, 230, 217, 0.22), inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+  --recess-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6), inset 0 -1px 0 rgba(236, 230, 217, 0.06);
+
+  --shadow-tint: 0, 0, 0;
 }
 
 /* ---------------------------------------------------------------------------
-   Theme-independent tokens. Section 16.9.
+   Theme-independent tokens.
    --------------------------------------------------------------------------- */
 
 :root {
-  /* Spacing is a 4px base scale: 4 8 12 16 24 32 48 64. Exposed so components
-     can reference the scale by name rather than by magic number. */
+  /* Dense control-room spacing: 4px base, sections 16px apart max. */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -122,33 +146,31 @@
   --space-12: 48px;
   --space-16: 64px;
 
-  /* Radii. Pills and avatars 9999, cards and bubbles 12, panels and drawers
-     16. The table SVG has its own curvature and takes no radius. */
+  /* Radii. Chips and pills 9999, cards 12, panels 16. */
   --radius-pill: 9999px;
   --radius-card: 12px;
   --radius-panel: 16px;
 
   /* Type scale, in rem at a 16px root. */
-  --fs-display: 2.25rem;
-  --fs-h1: 1.5rem;
-  --fs-h2: 1.125rem;
+  --fs-display: 1.6rem;
+  --fs-h1: 1.25rem;
+  --fs-h2: 1.05rem;
   --fs-body: 0.875rem;
   --fs-small: 0.8125rem;
   --fs-micro: 0.6875rem;
 
-  --tracking-micro: 0.08em;
+  --tracking-micro: 0.02em;
 
-  /* Seat geometry. */
-  --seat-diameter: clamp(52px, 7.2vw, 92px);
+  /* Seat geometry. Dense room: slightly smaller discs so eight fit. */
+  --seat-diameter: clamp(48px, 6.4vw, 80px);
   --drawer-width: 480px;
 
-  /* Focus ring: 2px blue at a 2px offset, never removed. Section 16.9. */
-  --focus-ring: 2px solid var(--seat-5);
+  /* Focus ring: 2px gold at a 2px offset, never removed. */
+  --focus-ring: 2px solid var(--gold);
   --focus-offset: 2px;
 }
 
-/* Faint background grid for depth: 24px cell, drawn with two linear-gradient
-   layers. No texture image assets in either theme. Section 16.8. */
+/* Faint warm grid for depth, 24px cell. No image assets. */
 .themed-grid {
   background-image:
     linear-gradient(to right, var(--grid) 1px, transparent 1px),
@@ -157,31 +179,110 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Warm serif display face for the hearth theme. Section 16.9 says hearth's
-   serif is its single strongest signal.
+   Backroom atmosphere: vignette plus drifting smoke. Applied on the run page
+   root. Radial gradients only, low opacity, no literal image.
+   --------------------------------------------------------------------------- */
+
+.backroom {
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(201, 151, 63, 0.07), transparent 55%),
+    radial-gradient(140% 110% at 50% 115%, rgba(0, 0, 0, 0.55), transparent 60%),
+    var(--bg);
+}
+
+.backroom-vignette {
+  background: radial-gradient(115% 100% at 50% 42%, transparent 52%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+/* Slow drifting warm haze across the table centre. Opacity and transform
+   only, so it composites. Paused under prefers-reduced-motion. */
+@keyframes backroom-drift {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate3d(-2%, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate3d(2%, -1.5%, 0) scale(1.04);
+  }
+}
+
+.animate-smoke-drift {
+  animation: backroom-drift 26s ease-in-out infinite;
+}
+
+/* ---------------------------------------------------------------------------
+   Display face: Playfair Display for headings and agent names in both themes.
+   Body stays Inter. Two typefaces max, no monospace anywhere.
    --------------------------------------------------------------------------- */
 
 .display-face {
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-:root[data-theme='hearth'] .display-face {
   font-family: var(--font-display-serif), Georgia, 'Times New Roman', serif;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-/* Numerals must be tabular in both themes: scores that shift width while
-   counting up look broken. Section 16.9. */
+/* Numerals must be tabular in both themes. */
 .tnum {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
 }
 
-/* Small-caps step labels. Section 16.9. */
+/* Small step labels: sentence case, never uppercase, no tracked-out eyebrow. */
 .step-label {
   font-size: var(--fs-micro);
   letter-spacing: var(--tracking-micro);
-  text-transform: uppercase;
+  text-transform: none;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Poker-chip seat disc: solid fill, embossed ring, drop shadow so the disc
+   reads as an object sitting on the felt rather than a flat UI dot.
+   --------------------------------------------------------------------------- */
+
+.chip-disc {
+  box-shadow: var(--chip-shadow);
+}
+
+.chip-disc::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--chip-inset);
+  pointer-events: none;
+}
+
+.chip-ring {
+  box-shadow:
+    inset 0 0 0 2px rgba(236, 230, 217, 0.16),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+/* Chip denomination badge: small embossed tag, dark ground, gold text. */
+.chip-denom {
+  background: var(--denom-bg);
+  border: 1px solid var(--line-strong);
+  color: var(--gold-hi);
+  box-shadow:
+    inset 0 1px 0 rgba(236, 230, 217, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Recessed chip-tray input: dark inset surface with a gold focus ring. */
+.recessed {
+  background: var(--recess-bg);
+  box-shadow: var(--recess-shadow);
+  border: 1px solid var(--line);
+}
+
+.recessed:focus-within,
+.recessed:focus {
+  border-color: var(--gold);
+  box-shadow:
+    var(--recess-shadow),
+    0 0 0 1px var(--gold);
+  outline: none;
 }

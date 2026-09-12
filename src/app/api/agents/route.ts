@@ -44,7 +44,7 @@ const createSchema = z.object({
   avatarStyle: z.enum(['dicebear', 'lucide', 'initials']).default('dicebear'),
   avatarSeed: z.string().trim().max(120).optional(),
   iconName: z.string().trim().max(60).optional(),
-  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#60a5fa'),
+  accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#C9973F'),
   accentToken: z.string().regex(/^--seat-[1-8]$/).default('--seat-5'),
   isMeAgent: z.boolean().default(false),
   enabled: z.boolean().default(true),

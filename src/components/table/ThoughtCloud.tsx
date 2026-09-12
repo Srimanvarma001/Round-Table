@@ -29,8 +29,9 @@ export function ThoughtCloud({
 }) {
   if (reduced) {
     return (
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={-1}
         onClick={onClick}
         aria-label={label}
         className="absolute -top-11 left-1/2 flex h-7 -translate-x-1/2 items-center justify-center
@@ -39,13 +40,14 @@ export function ThoughtCloud({
         style={{ borderColor: `${accent}44` }}
       >
         <span aria-hidden="true">···</span>
-      </button>
+      </div>
     );
   }
 
   return (
-    <motion.button
-      type="button"
+    <motion.div
+      role="button"
+      tabIndex={-1}
       onClick={onClick}
       aria-label={label}
       className="absolute -top-11 left-1/2 flex -translate-x-1/2 items-center gap-[5px]
@@ -72,7 +74,7 @@ export function ThoughtCloud({
         className="absolute -bottom-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45
                    border-b border-r border-[var(--line)] bg-[var(--bg-elev-2)]"
       />
-    </motion.button>
+    </motion.div>
   );
 }
 
@@ -91,8 +93,9 @@ export function FailedIndicator({
   label?: string;
 }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={-1}
       onClick={onClick}
       aria-label={label}
       title={message}
@@ -111,6 +114,6 @@ export function FailedIndicator({
         />
       </svg>
       <span className="max-w-[7rem] truncate">{message}</span>
-    </button>
+    </div>
   );
 }

@@ -15,16 +15,14 @@ import {
 import type { AvatarStyle } from '@/shared/constants';
 
 /**
- * Avatar system, section 16.3.
+ * Avatar system: wax-seal medallions, never photographic faces.
  *
- * Hard rule: no photographic faces, no realistic human illustration, no style
- * that implies a person. The table is a council of lenses, not eight people.
- *
- * Three styles, selectable per seat:
+ * Every style renders as a solid object sitting on the felt: an accent fill
+ * with an embossed ring and a drop shadow (the `chip-disc` layer in themes.css
+ * supplies the shadow and inset highlight). Three styles, selectable per seat:
  *  1. `dicebear` — abstract generative geometry, deterministic from a seed,
- *     generated on the SERVER and cached in `agents.avatar_svg_cache`. The
- *     dependency therefore stays out of the client bundle.
- *  2. `lucide`   — one persona icon in an accent-tinted circle.
+ *     generated on the SERVER and cached. Mounted inside the medallion frame.
+ *  2. `lucide`   — one persona glyph stamped into the wax.
  *  3. `initials` — two-letter monogram. Also the graceful degradation when SVG
  *     generation fails. Never leave a seat without an avatar.
  */
@@ -63,22 +61,32 @@ export function Avatar({
   size = 44,
   dimmed = false,
 }: AvatarProps) {
-  const styleObj = {
+  const frame = {
     width: size,
     height: size,
     opacity: dimmed ? 0.4 : 1,
+    // Wax body: accent lit from above, darkened at the edge, with the
+    // embossed ring highlight from the chip-ring parent.
+    background: `radial-gradient(circle at 50% 32%, color-mix(in srgb, ${accent} 62%, var(--text) 8%), color-mix(in srgb, ${accent} 78%, var(--bg) 22%) 68%, color-mix(in srgb, ${accent} 55%, var(--bg) 45%))`,
   } as const;
 
   if (style === 'dicebear' && svg) {
     // The SVG is server-generated from a trusted, deterministic seed; it is
-    // never derived from user-supplied HTML.
+    // never derived from user-supplied HTML. It sits inside the wax frame as
+    // the seal device, darkened slightly so the ring stays dominant.
     return (
       <div
         aria-hidden="true"
         className="flex items-center justify-center overflow-hidden rounded-[var(--radius-pill)]"
-        style={styleObj}
-        dangerouslySetInnerHTML={{ __html: svg }}
-      />
+        style={frame}
+      >
+        <div
+          aria-hidden="true"
+          className="flex items-center justify-center overflow-hidden rounded-[var(--radius-pill)]"
+          style={{ width: size * 0.78, height: size * 0.78, filter: 'brightness(0.94) saturate(0.9)' }}
+          dangerouslySetInnerHTML={{ __html: svg }}
+        />
+      </div>
     );
   }
 
@@ -88,9 +96,19 @@ export function Avatar({
       <div
         aria-hidden="true"
         className="flex items-center justify-center rounded-[var(--radius-pill)]"
-        style={{ ...styleObj, background: `color-mix(in srgb, ${accent} 16%, transparent)` }}
+        style={frame}
       >
-        <Icon style={{ width: size * 0.5, height: size * 0.5, color: accent }} strokeWidth={1.75} />
+        <span
+          className="flex items-center justify-center rounded-[var(--radius-pill)]"
+          style={{
+            width: size * 0.62,
+            height: size * 0.62,
+            background: 'color-mix(in srgb, var(--bg) 42%, transparent)',
+            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.5), 0 1px 0 rgba(236,230,217,0.14)',
+          }}
+        >
+          <Icon style={{ width: size * 0.34, height: size * 0.34, color: 'var(--text)' }} strokeWidth={1.75} />
+        </span>
       </div>
     );
   }
@@ -100,15 +118,28 @@ export function Avatar({
   return (
     <div
       aria-hidden="true"
-      className="flex items-center justify-center rounded-[var(--radius-pill)] font-semibold"
+      className="display-face flex items-center justify-center rounded-[var(--radius-pill)]"
       style={{
-        ...styleObj,
-        background: `color-mix(in srgb, ${accent} 16%, transparent)`,
-        color: accent,
-        fontSize: size * 0.36,
+        ...frame,
+        color: 'var(--bg)',
+        fontSize: size * 0.34,
+        fontWeight: 700,
       }}
     >
-      {monogram}
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: size * 0.62,
+          height: size * 0.62,
+          borderRadius: 'var(--radius-pill)',
+          background: 'rgba(236, 230, 217, 0.2)',
+          boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.4)',
+        }}
+      >
+        {monogram}
+      </span>
     </div>
   );
 }

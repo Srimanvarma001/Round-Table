@@ -1,25 +1,25 @@
 import type { Metadata } from 'next';
-import { Fraunces, Inter } from 'next/font/google';
+import { Inter, Playfair_Display } from 'next/font/google';
 
 import { AppShell } from '@/components/shell/AppShell';
 import { Providers } from '@/components/shell/Providers';
 
 import './globals.css';
 
-// Section 16.9: two faces, both loaded with next/font so there is no layout
-// shift. Inter is the UI and body face in both themes; the hearth theme swaps
-// in a serif for display only, which is its strongest single signal.
+// Backroom design system: two faces only. Playfair Display carries headings
+// and agent names with weight and presence; Inter carries body and UI text.
+// Loaded with next/font so there is no layout shift.
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 });
 
-const displaySerif = Fraunces({
+const displaySerif = Playfair_Display({
   subsets: ['latin'],
   variable: '--font-display-serif',
   display: 'swap',
-  axes: ['SOFT', 'WONK'],
+  weight: ['500', '600', '700'],
 });
 
 export const metadata: Metadata = {

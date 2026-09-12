@@ -9,15 +9,11 @@ import type { AvatarStyle } from '@/shared/constants';
 import type { AgentDTO } from '@/shared/types';
 
 /**
- * Compact layout, section 16.11 (below 640px, and whenever the seat arc gap
- * falls below `seatDiameter × 1.35`).
+ * Compact layout (below 640px, and whenever the seat arc gap falls below
+ * `seatDiameter × 1.35`).
  *
- * The ellipse is abandoned. Seats become a vertical stack of rows: an avatar, a
- * name, a weight badge, and an inline thought indicator.
- *
- * This is a real layout, not a degraded one: it is what the replay view uses
- * for a run read on a phone, and it MUST be designed rather than fall out of a
- * breakpoint accident.
+ * The ellipse is abandoned. Seats become a vertical stack of rows: a chip
+ * medallion, a name, a denomination badge, and an inline thought indicator.
  */
 export function SeatStack({
   agents,
@@ -62,29 +58,31 @@ export function SeatStack({
             >
               <span className="relative shrink-0">
                 <span
-                  className="absolute inset-0 rounded-[var(--radius-pill)]"
+                  className="chip-ring absolute inset-0 rounded-[var(--radius-pill)]"
                   style={{
-                    border: `2px solid ${failed ? 'var(--danger)' : accent}`,
-                    opacity: thinking || live?.status === 'spoken' ? 1 : 0.35,
-                    background: `color-mix(in srgb, ${accent} 12%, transparent)`,
+                    border: `2px solid ${failed ? 'var(--danger)' : agent.isMeAgent ? 'var(--gold)' : accent}`,
+                    opacity: thinking || live?.status === 'spoken' || agent.isMeAgent ? 1 : 0.4,
+                    background: `color-mix(in srgb, ${accent} 14%, transparent)`,
                   }}
                 />
-                <Avatar
-                  style={agent.avatarStyle as AvatarStyle}
-                  svg={agent.avatarSvg}
-                  iconName={agent.iconName}
-                  name={agent.name}
-                  accent={accent}
-                  size={36}
-                  dimmed={disabled}
-                />
+                <span className="chip-disc relative block rounded-[var(--radius-pill)]">
+                  <Avatar
+                    style={agent.avatarStyle as AvatarStyle}
+                    svg={agent.avatarSvg}
+                    iconName={agent.iconName}
+                    name={agent.name}
+                    accent={accent}
+                    size={36}
+                    dimmed={disabled}
+                  />
+                </span>
               </span>
 
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
                   <span
                     className={[
-                      'truncate text-[13px]',
+                      'display-face truncate text-[13px]',
                       disabled
                         ? 'text-[var(--text-mute)] line-through'
                         : thinking
@@ -94,7 +92,7 @@ export function SeatStack({
                   >
                     {agent.name}
                   </span>
-                  <span className="tnum shrink-0 rounded-[var(--radius-pill)] border border-[var(--line)] px-1.5 text-[10px] text-[var(--text-mute)]">
+                  <span className="chip-denom tnum shrink-0 rounded-[var(--radius-pill)] px-1.5 text-[10px] font-semibold">
                     {disabled ? '0%' : `${(weight * 100).toFixed(weight < 0.1 ? 1 : 0)}%`}
                   </span>
                 </span>
@@ -106,7 +104,7 @@ export function SeatStack({
               </span>
 
               {/* Inline thought indicator. With reduced motion this is a static
-                  ellipsis rather than a pulse (section 16.12). */}
+                  ellipsis rather than a pulse. */}
               <AnimatePresence>
                 {thinking && (
                   <motion.span

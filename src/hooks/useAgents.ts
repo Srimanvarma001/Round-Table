@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { AgentDTO, AgentsResponse } from '@/shared/types';
@@ -19,9 +20,10 @@ export function useAgents() {
     staleTime: 30_000,
   });
 
-  const agents: AgentDTO[] = (query.data?.agents ?? [])
-    .slice()
-    .sort((a, b) => a.orderIndex - b.orderIndex);
+  const agents: AgentDTO[] = useMemo(
+    () => (query.data?.agents ?? []).slice().sort((a, b) => a.orderIndex - b.orderIndex),
+    [query.data?.agents],
+  );
 
   return {
     ...query,

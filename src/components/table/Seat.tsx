@@ -5,27 +5,22 @@ import { motion } from 'framer-motion';
 import { Avatar } from '@/components/table/Avatar';
 import { SeatAura } from '@/components/table/SeatAura';
 import { SpeechBubble } from '@/components/table/SpeechBubble';
-import { FailedIndicator, ThoughtCloud } from '@/components/table/ThoughtCloud';
 import type { SeatLiveState } from '@/hooks/useRunStream';
 import type { AvatarStyle, SeatState } from '@/shared/constants';
 import type { AgentDTO } from '@/shared/types';
 import { truncate } from '@/lib/utils';
 
 /**
- * The seat, sections 16.3 and 16.4.
+ * The seat: one grouped poker-chip unit per agent.
  *
- * Every seat renders the same five stacked layers, and this order is fixed:
+ * Disc, name and weight badge are visually bound in a single compact card so
+ * they read as one object on the felt, never as three floating elements. The
+ * disc itself is a wax-seal medallion: solid accent fill, embossed ring,
+ * drop shadow.
  *
- *   SeatAura      (behind, animated glow, thinking only)
- *   SeatRing      (2px ring in accent, accent-tinted fill at 12% alpha)
- *   Avatar        (the SVG or icon, inset 3px)
- *   WeightBadge   (bottom-right, "25%" in tabular numerals)
- *   NameLabel     (below the ring, 13px, text-dim)
- *   SpeechBubble  (below the name, highest z)
- *
- * The weight badge is ALWAYS visible, not hidden behind a hover. The whole
- * point of the product is weighted voting; a user should be able to see the
- * 25 percent seat without asking.
+ * Thinking reads as a soft pulsing glow ring around the disc (SeatAura).
+ * There is no floating typing cloud. Clicking the seat opens the reasoning
+ * drawer, which is where the full text lives.
  *
  * Five states, driven by the run reducer, never by local component state:
  *   idle | thinking | spoken | failed | disabled
@@ -38,7 +33,7 @@ export interface SeatProps {
   live: SeatLiveState | undefined;
   /** True while the stagger queue has this seat active. */
   staggering: boolean;
-  /** Phase offset in seconds for the aura wave (section 16.10 rule 6). */
+  /** Phase offset in seconds for the aura wave. */
   auraDelay: number;
   x: number;
   y: number;
@@ -49,7 +44,6 @@ export interface SeatProps {
   drawerOpenForSeat: boolean;
   registerRef: (agentId: string, el: HTMLButtonElement | null) => void;
   onOpen: (agentId: string) => void;
-  /** Section 16.6: the seat's avatar unmounts as the drawer's copy mounts. */
   layoutIdPrefix: string;
 }
 
@@ -74,8 +68,7 @@ export function Seat({
     : (live?.status ?? 'idle');
 
   // A seat whose buffer is still draining reads as thinking even after the
-  // server finished, which is exactly what the stagger is for (section 16.10
-  // rule 2). A seat whose call already finished and drained reads as spoken.
+  // server finished; a finished and drained seat reads as spoken.
   const effectiveState: SeatState =
     state === 'idle' && staggering ? 'thinking' : state === 'spoken' && staggering ? 'thinking' : state;
 
@@ -84,12 +77,16 @@ export function Seat({
   const isFailed = effectiveState === 'failed';
   const isSpoken = effectiveState === 'spoken';
   const isDisabled = effectiveState === 'disabled';
+  const isYou = agent.isMeAgent;
 
-  // Ring alpha per the state table in section 16.4.
-  const ringAlpha = isThinking || isSpoken ? 1 : isDisabled ? 0.0 : 0.35;
-  const ringColor = isFailed ? 'var(--danger)' : accent;
+  // The head of the table sits slightly larger, with a gold embossed border
+  // and a soft glow so it reads as the host seat at a glance.
+  const discDiameter = isYou ? Math.round(diameter * 1.2) : diameter;
 
-  const avatarScale = isThinking ? 1.06 : 1;
+  const ringColor = isFailed ? 'var(--danger)' : isYou ? 'var(--gold)' : accent;
+  const ringAlpha = isThinking || isSpoken || isYou ? 1 : isDisabled ? 0.0 : 0.4;
+
+  const avatarScale = isThinking ? 1.05 : 1;
   const avatarSaturation = isDisabled
     ? 0.4
     : isFailed
@@ -98,7 +95,7 @@ export function Seat({
         ? 1.15
         : isSpoken
           ? 1
-          : 0.55;
+          : 0.7;
 
   const take = live?.finalText || live?.visibleText || '';
   const label = agent.name;
@@ -109,62 +106,71 @@ export function Seat({
       style={{
         left: `${x}%`,
         top: `${y}%`,
-        width: diameter,
-        // Centre the seat on its computed point.
+        width: discDiameter + 36,
+        // Centre the seat card on its computed point.
         transform: 'translate(-50%, -50%)',
-        zIndex: isThinking || isSpoken ? 20 : 10,
+        zIndex: isYou ? 25 : isThinking || isSpoken ? 20 : 10,
       }}
     >
       {/* Keyboard order follows order_index, which is the DOM order here.
           Enter opens the drawer, Escape closes it, focus returns to the seat
-          that opened it (section 16.12). */}
+          that opened it. */}
       <button
         ref={(el) => registerRef(agent.id, el)}
         type="button"
         onClick={() => onOpen(agent.id)}
         disabled={isDisabled}
         aria-label={seatAriaLabel(agent, effectiveState, normalisedWeight, take)}
-        className="group relative flex w-full flex-col items-center bg-transparent p-0"
-        style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+        className={[
+          'group relative mx-auto flex w-fit flex-col items-center gap-1 rounded-[var(--radius-card)] border px-2 pb-1.5 pt-2 backdrop-blur-sm transition-colors',
+          isYou
+            ? 'border-[var(--gold)]/60 bg-[var(--bg-elev-1)]/92'
+            : 'border-[var(--line)] bg-[var(--bg-elev-1)]/82 hover:border-[var(--line-strong)]',
+        ].join(' ')}
+        style={{
+          cursor: isDisabled ? 'not-allowed' : 'pointer',
+          boxShadow: isYou
+            ? '0 0 0 1px rgba(201,151,63,0.25), 0 0 22px rgba(201,151,63,0.22), var(--elev-2)'
+            : 'var(--elev-1)',
+        }}
       >
-        <div className="relative" style={{ width: diameter, height: diameter }}>
+        <div className="relative" style={{ width: discDiameter, height: discDiameter }}>
           <SeatAura
-            accent={accent}
+            accent={isYou ? 'var(--gold)' : accent}
             active={isThinking}
             delay={auraDelay}
             reduced={reducedMotion}
           />
 
-          {/* SeatRing — 2px accent ring, accent-tinted fill at 12% alpha. */}
+          {/* Chip rim: embossed ring in the seat accent, gold for the host. */}
           <div
-            className="absolute inset-0 rounded-[var(--radius-pill)] transition-[background-color,border-color] duration-300"
+            className="chip-ring absolute inset-0 rounded-[var(--radius-pill)] transition-[border-color] duration-300"
             style={{
               border: `2px solid ${ringColor}`,
               borderColor: isFailed
                 ? 'var(--danger)'
                 : isDisabled
                   ? 'var(--line)'
-                  : `color-mix(in srgb, ${accent} ${ringAlpha * 100}%, transparent)`,
+                  : isYou
+                    ? 'var(--gold)'
+                    : `color-mix(in srgb, ${accent} ${Math.round(ringAlpha * 100)}%, transparent)`,
               background: isDisabled
                 ? 'var(--bg-elev-2)'
-                : `color-mix(in srgb, ${accent} 12%, transparent)`,
+                : `color-mix(in srgb, ${accent} 14%, transparent)`,
             }}
           />
 
-          {/* Avatar, inset 3px, with the saturation and scale from the state
-              table. Animating transform, never width/height (section 16.13). */}
+          {/* Medallion, inset 3px. Animating transform only, never size. */}
           <motion.div
             className="absolute inset-[3px]"
             animate={{ scale: avatarScale }}
             transition={{ type: 'spring', stiffness: 260, damping: 24 }}
             style={{ filter: `saturate(${avatarSaturation})` }}
           >
-            {/* Section 16.6: exactly ONE of the seat copy and the drawer copy
-                is mounted at a time, or Framer cannot resolve the pair. */}
             {!drawerOpenForSeat ? (
               <motion.div
                 layoutId={`${layoutIdPrefix}${agent.id}`}
-                className="h-full w-full rounded-[var(--radius-pill)]"
+                className="chip-disc relative h-full w-full overflow-hidden rounded-[var(--radius-pill)]"
               >
                 <Avatar
                   style={agent.avatarStyle as AvatarStyle}
@@ -172,7 +178,7 @@ export function Seat({
                   iconName={agent.iconName}
                   name={agent.name}
                   accent={accent}
-                  size={diameter - 10}
+                  size={discDiameter - 6}
                   dimmed={isDisabled}
                 />
               </motion.div>
@@ -180,59 +186,52 @@ export function Seat({
               <div className="h-full w-full rounded-[var(--radius-pill)]" />
             )}
           </motion.div>
+        </div>
 
-          {/* WeightBadge — always visible, tabular numerals. Disabled seats
-              show 0 percent. */}
+        {/* Name plus denomination, bound to the disc above in the same card.
+            Never encoded in colour alone: disabled strikes through. */}
+        <span className="flex max-w-[8.5rem] flex-col items-center gap-0.5">
           <span
-            className="tnum absolute -bottom-1 -right-1 rounded-[var(--radius-pill)] border
-                       border-[var(--line)] bg-[var(--bg-elev-3)] px-1.5 py-[1px]
-                       text-[10px] font-semibold leading-tight text-[var(--text-dim)]"
-            style={{ boxShadow: 'var(--elev-1)' }}
-            title={`Voting weight ${(normalisedWeight * 100).toFixed(1)}%`}
+            className={[
+              'display-face max-w-full truncate text-center text-[13px] leading-tight',
+              isDisabled
+                ? 'text-[var(--text-mute)] line-through'
+                : isThinking || isSpoken || isYou
+                  ? 'text-[var(--text)]'
+                  : 'text-[var(--text-dim)]',
+            ].join(' ')}
+          >
+            {label}
+            {isYou ? (
+              <span className="ml-1 text-[10px] italic text-[var(--gold-hi)]">you</span>
+            ) : null}
+          </span>
+          <span
+            className="chip-denom tnum rounded-[var(--radius-pill)] px-1.5 py-px text-[10px] font-semibold leading-tight"
+            title={`Voting weight ${(normalisedWeight * 100).toFixed(1)} percent`}
           >
             {isDisabled ? '0%' : `${(normalisedWeight * 100).toFixed(normalisedWeight < 0.1 ? 1 : 0)}%`}
           </span>
-
-          {isThinking && (
-            <ThoughtCloud
-              accent={accent}
-              reduced={reducedMotion}
+          {isFailed ? (
+            <span
+              role="button"
+              tabIndex={-1}
               onClick={() => onOpen(agent.id)}
-              label={`Show ${agent.name}'s reasoning`}
-            />
-          )}
-          {isFailed && (
-            <FailedIndicator
-              message={live?.error?.code ?? 'FAILED'}
-              onClick={() => onOpen(agent.id)}
-              label={`Show ${agent.name}'s error`}
-            />
-          )}
-        </div>
-
-        {/* NameLabel — below the ring, 13px, text-dim. Never encoded in colour
-            alone: the disabled state strikes the name through (section 16.12). */}
-        <span
-          className={[
-            'mt-1.5 max-w-[9.5rem] truncate text-center text-[13px] leading-tight',
-            isDisabled
-              ? 'text-[var(--text-mute)] line-through'
-              : isThinking || isSpoken
-                ? 'text-[var(--text)]'
-                : 'text-[var(--text-dim)]',
-          ].join(' ')}
-        >
-          {label}
-          {agent.isMeAgent ? (
-            <span className="ml-1 text-[10px] text-[var(--text-mute)]">you</span>
+              aria-label={`Show ${agent.name}'s error`}
+              title={live?.error?.code ?? 'FAILED'}
+              className="max-w-full truncate rounded-[var(--radius-pill)] border border-[var(--danger)]/50 px-1.5 py-px text-[10px] text-[var(--danger)]"
+            >
+              {live?.error?.code ?? 'FAILED'}
+            </span>
           ) : null}
         </span>
 
         {isSpoken && take ? (
           <SpeechBubble
             take={truncate(take, 140)}
-            accent={accent}
+            accent={isYou ? 'var(--gold)' : accent}
             compact={compactBubble}
+            above={y > 62}
             onOpen={() => onOpen(agent.id)}
           />
         ) : null}
@@ -243,8 +242,7 @@ export function Seat({
 
 /**
  * The accessible name of a seat carries the full state and the final score
- * value, so a screen-reader user is not dependent on watching the table
- * (section 16.12).
+ * value, so a screen-reader user is not dependent on watching the table.
  */
 function seatAriaLabel(
   agent: AgentDTO,

@@ -12,7 +12,7 @@ const badgeVariants = cva(
         ok: 'border-[var(--ok)]/40 bg-[var(--ok)]/10 text-[var(--ok)]',
         warn: 'border-[var(--warn)]/40 bg-[var(--warn)]/10 text-[var(--warn)]',
         danger: 'border-[var(--danger)]/40 bg-[var(--danger)]/10 text-[var(--danger)]',
-        accent: 'border-[var(--seat-5)]/40 bg-[var(--seat-5)]/10 text-[var(--seat-5)]',
+        accent: 'border-[var(--gold)]/40 bg-[var(--gold)]/10 text-[var(--gold-hi)]',
       },
     },
     defaultVariants: { tone: 'neutral' },

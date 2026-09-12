@@ -20,6 +20,10 @@
     height: 100%;
   }
 
+  html {
+    background-color: var(--bg);
+  }
+
   body {
     background-color: var(--bg);
     color: var(--text);
@@ -27,12 +31,15 @@
     font-size: var(--fs-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Single-viewport control room: the page never scrolls, not even a
+       scrollbar. Inner panels scroll internally where they must. */
+    height: 100dvh;
+    overflow: hidden;
   }
 
-  /* Focus rings, section 16.9: 2px --seat-5 at a 2px offset on every
-     interactive element, never removed. Keyboard users navigate seats, and a
-     focus ring that disappears over a dark table makes the product unusable
-     without a mouse. */
+  /* Focus rings: 2px gold at a 2px offset on every interactive element,
+     never removed. Keyboard users navigate seats, and a focus ring that
+     disappears over a dark table makes the product unusable without a mouse. */
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-offset);

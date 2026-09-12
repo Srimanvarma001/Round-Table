@@ -138,9 +138,9 @@ export function ReasoningDrawer({
                       {active.name}
                     </p>
                     <p className="tnum text-[11px] text-[var(--text-mute)]">
-                      {active.provider} · {active.modelId} ·{' '}
+                      {active.provider}, {active.modelId},{' '}
                       {live?.status === 'thinking' ? 'thinking' : (live?.status ?? 'idle')}
-                      {live && live.tokensOut > 0 ? ` · ${live.tokensOut} tok` : ''}
+                      {live && live.tokensOut > 0 ? `, ${live.tokensOut} tok` : ''}
                     </p>
                   </div>
                 </>
@@ -153,7 +153,7 @@ export function ReasoningDrawer({
                   type="checkbox"
                   checked={autoFollow}
                   onChange={(e) => setAutoFollow(e.target.checked)}
-                  className="accent-[var(--seat-5)]"
+                  className="accent-[var(--gold)]"
                 />
                 Follow
               </label>
