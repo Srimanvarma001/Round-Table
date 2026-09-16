@@ -1,6 +1,5 @@
 'use client';
 
-import { LayoutGroup } from 'framer-motion';
 import { useCallback, useMemo, useRef } from 'react';
 
 import { CenterPlinth } from '@/components/table/CenterPlinth';
@@ -9,23 +8,19 @@ import { SeatStack } from '@/components/table/SeatStack';
 import { TableSurface } from '@/components/table/TableSurface';
 import type { SeatLiveState } from '@/hooks/useRunStream';
 import { useLayoutTier } from '@/hooks/useLayoutTier';
-import { placeSeats } from '@/lib/layout/seats';
+import { placeRectSeats } from '@/lib/layout/seats';
 import type { PartialScore, RevealPayload } from '@/shared/events';
 import type { StepName } from '@/shared/constants';
 import type { AgentDTO } from '@/shared/types';
 
 /**
- * The round table, section 16.1 and section 15.3.
+ * Wireframe round table: a portrait outline rectangle with 8 outlined seat
+ * slots — 1 top (You, head of table), 3 down the left, 3 down the right,
+ * 1 bottom. Monochrome linework; the warm accent appears only on the active
+ * seat's border and the thinking bubble.
  *
- * Owns the ellipse layout via `placeSeats`, distributes run state to seats, and
- * owns the LayoutGroup that makes the shared-layout expand to the reasoning
- * drawer work.
- *
- * The layout MUST be unit-tested against these properties: seat count matches,
- * all coordinates lie inside 0 to 100, screen-space gap between adjacent seats
- * is uniform within 2 percent, and the Me Agent lands at the top. Arc-length
- * spacing is easy to get subtly wrong and hard to eyeball, so it gets a test
- * rather than a scroll-through.
+ * The ellipse helpers in `lib/layout/seats` are untouched (unit-tested); this
+ * view uses the fixed `placeRectSeats` wireframe instead.
  */
 
 export interface RoundTableProps {
@@ -66,26 +61,10 @@ export function RoundTable({
     else refs.current.delete(agentId);
   }, []);
 
-  // Section 16.1: index 0 is the Me Agent, seated at the head of the table.
-  // `agents` arrives already ordered by order_index, which the seed puts the Me
-  // Agent first in.
-  const placements = useMemo(
-    () => placeSeats(agents.length, metrics.radiusX, metrics.radiusY),
-    [agents.length, metrics.radiusX, metrics.radiusY],
-  );
+  // Fixed wireframe: index 0 is the Me Agent at top-centre.
+  const placements = useMemo(() => placeRectSeats(agents.length), [agents.length]);
 
   const activeSet = useMemo(() => new Set(activeSeats), [activeSeats]);
-
-  // Section 16.10 rule 6: when more than one seat is thinking the auras
-  // phase-offset by 0.4s each, so eight glows pulse in a visible wave rather
-  // than in unison. Unison reads as a loading screen; a wave reads as a room.
-  const auraDelays = useMemo(() => {
-    const out: Record<string, number> = {};
-    activeSeats.forEach((id, i) => {
-      out[id] = (i % 8) * 0.4;
-    });
-    return out;
-  }, [activeSeats]);
 
   const compact = metrics.tier === 'compact' || metrics.arcGapTooSmall;
 
@@ -105,45 +84,47 @@ export function RoundTable({
     );
   }
 
+  // `min-h` floors the height where the parent provides none (e.g. the
+  // replay page stacks the table without a fixed-height ancestor). On the
+  // live page the flex-1 parent already fills the viewport, so this is a
+  // no-op there. Without it the percentage seat positions collapse into a
+  // strip and the fixed-size slots overlap.
   return (
-    <LayoutGroup>
-      {/* Fills the flex-grow table area from the page; no fixed pixel or vh
-          heights here so smaller laptop viewports cannot overflow. */}
-      <div ref={containerRef} className="relative mx-auto h-full min-h-0 w-full flex-1">
-        {metrics.showTableSurface ? <TableSurface step={step} /> : null}
+    <div ref={containerRef} className="relative mx-auto h-full min-h-[560px] w-full flex-1">
+      <TableSurface step={step} />
 
-        <CenterPlinth
-          step={step}
-          proposalCount={proposalCount}
-          refiningSeatNames={refiningSeatNames}
-          partialScores={partialScores}
-          reveal={reveal}
-        />
+      <CenterPlinth
+        step={step}
+        proposalCount={proposalCount}
+        refiningSeatNames={refiningSeatNames}
+        partialScores={partialScores}
+        reveal={reveal}
+      />
 
-        {agents.map((agent, i) => {
-          const placement = placements[i];
-          if (!placement) return null;
-          return (
-            <Seat
-              key={agent.id}
-              agent={agent}
-              normalisedWeight={normalisedWeights[agent.id] ?? 0}
-              live={seats[agent.id]}
-              staggering={activeSet.has(agent.id)}
-              auraDelay={auraDelays[agent.id] ?? 0}
-              x={placement.x}
-              y={placement.y}
-              diameter={metrics.seatDiameter}
-              reducedMotion={reducedMotion}
-              compactBubble={metrics.compactBubble}
-              drawerOpenForSeat={drawerAgentId === agent.id}
-              registerRef={registerRef}
-              onOpen={onOpenDrawer}
-              layoutIdPrefix="avatar-"
-            />
-          );
-        })}
-      </div>
-    </LayoutGroup>
+      {agents.map((agent, i) => {
+        const placement = placements[i];
+        if (!placement) return null;
+        return (
+          <Seat
+            key={agent.id}
+            agent={agent}
+            normalisedWeight={normalisedWeights[agent.id] ?? 0}
+            live={seats[agent.id]}
+            staggering={activeSet.has(agent.id)}
+            auraDelay={0}
+            x={placement.x}
+            y={placement.y}
+            diameter={metrics.seatDiameter}
+            reducedMotion={reducedMotion}
+            compactBubble={metrics.compactBubble}
+            drawerOpenForSeat={drawerAgentId === agent.id}
+            registerRef={registerRef}
+            onOpen={onOpenDrawer}
+            layoutIdPrefix="avatar-"
+            placement={placement}
+          />
+        );
+      })}
+    </div>
   );
 }

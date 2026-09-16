@@ -182,6 +182,46 @@ export const LAYOUT_BREAKPOINTS: readonly LayoutBreakpoint[] = [
   },
 ];
 
+/**
+ * Rectangular wireframe layout: portrait table with 8 outlined slots —
+ * 1 top (You, head of table), 3 down the left, 3 down the right, 1 bottom.
+ *
+ * Index 0 is the Me Agent at top-centre. Clockwise order is preserved:
+ * 0 top, 1 right-top, 2 right-middle, 3 right-bottom, 4 bottom,
+ * 5 left-bottom, 6 left-middle, 7 left-top.
+ *
+ * Coordinates are percentages of the table-area container (0-100), kept well
+ * clear of the central portrait rectangle (x ~37-63, y ~21-79) so bubbles
+ * never overlap neighbouring seats.
+ */
+export type RectSeatSide = 'top' | 'right' | 'bottom' | 'left';
+
+export interface RectSeatPlacement {
+  x: number;
+  y: number;
+  side: RectSeatSide;
+  /** Position of the bubble tail: away from the table, never over a neighbour. */
+  bubbleSide: 'above' | 'below' | 'left' | 'right';
+}
+
+export function placeRectSeats(n: number): RectSeatPlacement[] {
+  if (n <= 0) return [];
+  // Canonical 8-seat wireframe. For other counts fall back to repeating the
+  // side pattern so previews and tests never crash.
+  const canonical: RectSeatPlacement[] = [
+    { x: 50, y: 7, side: 'top', bubbleSide: 'above' },
+    { x: 81, y: 26, side: 'right', bubbleSide: 'right' },
+    { x: 81, y: 50, side: 'right', bubbleSide: 'right' },
+    { x: 81, y: 74, side: 'right', bubbleSide: 'right' },
+    { x: 50, y: 93, side: 'bottom', bubbleSide: 'below' },
+    { x: 19, y: 74, side: 'left', bubbleSide: 'left' },
+    { x: 19, y: 50, side: 'left', bubbleSide: 'left' },
+    { x: 19, y: 26, side: 'left', bubbleSide: 'left' },
+  ];
+  if (n === 8) return canonical;
+  return Array.from({ length: n }, (_, i) => canonical[i % canonical.length]);
+}
+
 /** The band that applies at a given viewport width. */
 export function layoutForWidth(width: number): LayoutBreakpoint {
   return (

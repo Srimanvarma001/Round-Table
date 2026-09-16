@@ -1,17 +1,13 @@
 'use client';
 
-import { Loader2, Pause, Play, Square, Zap } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import type { ControlState } from '@/hooks/useRunStream';
 
 /**
- * Controls: Generate, Stop, Resume, Abort — a single primary action
- * reflecting the run status.
- *
- * The prompt field is recessed like a chip tray (inset shadow, dark surface,
- * gold focus ring). Generate is solid gold with dark text. Stop pauses and
- * renders as a blood-red outline while a run is live.
+ * Wireframe controls for the slim right-side rail: stacked prompt field,
+ * quiet Generate outline button, refine toggle, and Stop/Abort as small text
+ * links. Visually quiet — thin dividers, small type, generous whitespace.
  */
 
 export interface ControlsProps {
@@ -45,82 +41,118 @@ export function Controls({
   buffered,
 }: ControlsProps) {
   const idle = controls === 'idle' || controls === 'done' || controls === 'error';
+  const running = controls === 'running';
+  const paused = controls === 'paused';
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
-        <input
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
+        <label htmlFor="seed-prompt" className="text-[11px] text-[var(--text-mute)]">
+          Prompt
+        </label>
+        <textarea
+          id="seed-prompt"
           value={seedPrompt}
           onChange={(e) => onSeedChange(e.target.value)}
           placeholder="What should the table think about?"
           aria-label="Seed prompt"
           disabled={!idle}
-          className="recessed h-9 flex-1 rounded-lg px-3 text-[13px]
-                     text-[var(--text)] placeholder:text-[var(--text-mute)]
-                     disabled:opacity-60"
+          rows={4}
+          className="w-full resize-none rounded-[3px] border border-[var(--line-strong)] bg-transparent
+                     px-2.5 py-2 text-[12.5px] leading-relaxed text-[var(--text)]
+                     placeholder:text-[var(--text-mute)] disabled:opacity-60"
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && idle && seedPrompt.trim()) onGenerate();
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && idle && seedPrompt.trim()) onGenerate();
           }}
         />
 
         {idle ? (
-          <Button
-            variant="primary"
-            size="md"
+          <button
+            type="button"
             onClick={onGenerate}
             disabled={!seedPrompt.trim() || busy}
+            className="flex w-full items-center justify-center gap-1.5 rounded-[3px] border
+                       border-[var(--line-strong)] px-3 py-1.5 text-[12px] text-[var(--text-dim)]
+                       transition-colors hover:border-[var(--text-mute)] hover:text-[var(--text)]
+                       disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
             {controls === 'done' || controls === 'error' ? 'Generate again' : 'Generate'}
-          </Button>
-        ) : controls === 'running' ? (
-          <>
-            <Button variant="stop" size="md" onClick={onPause}>
-              <Pause className="h-3.5 w-3.5" />
-              Stop
-            </Button>
-            <Button variant="danger" size="md" onClick={onAbort}>
-              <Square className="h-3.5 w-3.5" />
-              Abort
-            </Button>
-          </>
-        ) : controls === 'paused' ? (
-          <>
-            <Button variant="primary" size="md" onClick={onResume}>
-              <Play className="h-3.5 w-3.5" />
-              Resume
-            </Button>
-            <Button variant="danger" size="md" onClick={onAbort}>
-              <Square className="h-3.5 w-3.5" />
-              Abort
-            </Button>
-          </>
+          </button>
+        ) : paused ? (
+          <button
+            type="button"
+            onClick={onResume}
+            className="flex w-full items-center justify-center gap-1.5 rounded-[3px] border
+                       border-[rgba(201,151,63,0.5)] px-3 py-1.5 text-[12px] text-[var(--gold-hi)]"
+          >
+            Resume
+          </button>
         ) : (
-          <Button variant="secondary" size="md" onClick={onGenerate}>
+          <button
+            type="button"
+            onClick={onGenerate}
+            className="flex w-full items-center justify-center gap-1.5 rounded-[3px] border
+                       border-[var(--line-strong)] px-3 py-1.5 text-[12px] text-[var(--text-dim)]"
+          >
             Regenerate
-          </Button>
+          </button>
         )}
 
-        {/* A skip control flushes buffered text for users who want the result
-            rather than the show. */}
-        {buffered ? (
-          <Button variant="ghost" size="md" onClick={onSkipAnimation} title="Flush buffered text">
-            <Zap className="h-3.5 w-3.5" />
-            Skip
-          </Button>
-        ) : null}
+        <label className="flex cursor-pointer items-start gap-2 text-[11px] leading-snug text-[var(--text-mute)]">
+          <input
+            type="checkbox"
+            checked={refineEnabled}
+            onChange={(e) => onRefineChange(e.target.checked)}
+            disabled={!idle}
+            className="mt-0.5 accent-[var(--gold)]"
+          />
+          <span>Refine step</span>
+        </label>
       </div>
 
-      <label className="flex items-center gap-2 text-[11px] text-[var(--text-mute)]">
-        <input
-          type="checkbox"
-          checked={refineEnabled}
-          onChange={(e) => onRefineChange(e.target.checked)}
-          disabled={!idle}
-          className="accent-[var(--gold)]"
-        />
-        Run the refine step (skipped automatically when no proposal drew a critique)
-      </label>
+      {/* Live run actions: small quiet text links, not bordered buttons. */}
+      {!idle ? (
+        <div className="flex items-center gap-3 border-t border-[var(--line)] pt-2.5 text-[11.5px]">
+          {running ? (
+            <button
+              type="button"
+              onClick={onPause}
+              className="text-[var(--text-dim)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--text)]"
+            >
+              Stop
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onAbort}
+            className="text-[var(--text-dim)] underline decoration-[var(--line-strong)] underline-offset-4 hover:text-[var(--danger)]"
+          >
+            Abort
+          </button>
+          {buffered ? (
+            <button
+              type="button"
+              onClick={onSkipAnimation}
+              title="Flush buffered text"
+              className="ml-auto text-[var(--text-mute)] underline decoration-[var(--line)] underline-offset-4 hover:text-[var(--text-dim)]"
+            >
+              Skip
+            </button>
+          ) : null}
+        </div>
+      ) : buffered ? (
+        <div className="border-t border-[var(--line)] pt-2.5 text-[11.5px]">
+          <button
+            type="button"
+            onClick={onSkipAnimation}
+            title="Flush buffered text"
+            className="text-[var(--text-mute)] underline decoration-[var(--line)] underline-offset-4 hover:text-[var(--text-dim)]"
+          >
+            Skip animation
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

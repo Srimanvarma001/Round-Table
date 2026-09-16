@@ -17,9 +17,10 @@ import type { DissentRow, RevealPayload, RunMetrics } from '@/shared/events';
 import type { ProposalScoreDTO } from '@/shared/types';
 
 /**
- * The live table. Dense single-viewport control room: this root never grows
- * past its parent and never scrolls the page. Header and control bar take
- * their natural height; the table area fills the rest via flex-grow.
+ * Wireframe live table: single viewport, no page scroll. The portrait table
+ * fills the visual centre; a slim quiet rail (~260px) docked to the right
+ * edge carries the prompt, Generate, the current-step dot rail, and the
+ * Stop/Abort text links. No top control bar.
  */
 
 export default function RunPage() {
@@ -134,84 +135,17 @@ export default function RunPage() {
   const showReveal = Boolean(winner || state.status === 'failed' || state.status === 'aborted');
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2 overflow-hidden">
+    <div className="flex h-full min-h-0 flex-row overflow-hidden">
       {/* Polite live region: a screen-reader user is not dependent on watching
           the table. */}
       <p aria-live="polite" className="sr-only-live">
         {`Step ${state.step}. ${winner ? `Winner: ${winner.title}` : ''}`}
       </p>
 
-      {/* Control bar: prompt input plus step strip. Fixed natural height. */}
-      <section
-        aria-label="Run controls"
-        className="flex shrink-0 flex-col gap-2 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--bg-elev-1)] px-3 py-2"
-      >
-        <Controls
-          controls={controls}
-          seedPrompt={seedPrompt}
-          refineEnabled={refineEnabled}
-          onSeedChange={setSeedPrompt}
-          onRefineChange={setRefineEnabled}
-          onGenerate={() => void handleGenerate()}
-          onPause={() => void act('pause')}
-          onResume={() => void act('resume')}
-          onAbort={() => void act('abort')}
-          onSkipAnimation={flushAll}
-          busy={busy}
-          buffered={activeSeats.length > 0}
-        />
-
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-[var(--line)] pt-1.5">
-          <StepTimeline step={state.step} completedSteps={state.completedSteps} />
-
-          <div className="tnum ml-auto flex items-center gap-2 text-[11px] text-[var(--text-mute)]">
-            {state.round > 1 ? <span>Round {state.round}</span> : null}
-            {state.failedSeats.length > 0 ? <span>{state.failedSeats.length} failed</span> : null}
-            {winner ? <Badge tone="accent">Winner, {winner.title}</Badge> : null}
-          </div>
-        </div>
-      </section>
-
-      {/* Inline status strip: single line, never pushes the table off screen. */}
-      {state.budgetWarning ? (
-        <p
-          role="status"
-          className="shrink-0 truncate rounded-[var(--radius-card)] border border-[var(--warn)]/40
-                     bg-[var(--warn)]/10 px-2.5 py-1 text-[11.5px] text-[var(--warn)]"
-        >
-          Budget warning, {formatUsd(state.budgetWarning.usedUsd)} of{' '}
-          {formatUsd(state.budgetWarning.limitUsd)} used (
-          {Math.round(state.budgetWarning.pct * 100)}%). Completed work is kept if the run
-          aborts.
-        </p>
-      ) : null}
-
-      {state.error && state.status === 'failed' ? (
-        <p
-          role="alert"
-          className="shrink-0 truncate rounded-[var(--radius-card)] border border-[var(--danger)]/40 bg-[var(--danger)]/10
-                     px-2.5 py-1 text-[11.5px] text-[var(--danger)]"
-        >
-          Run failed ({state.error.code}): {state.error.message}
-        </p>
-      ) : null}
-
-      {state.status === 'paused' ? (
-        <p
-          role="status"
-          className="shrink-0 truncate rounded-[var(--radius-card)] border border-[var(--line-strong)] bg-[var(--bg-elev-2)]
-                     px-2.5 py-1 text-[11.5px] text-[var(--text-dim)]"
-        >
-          Paused. {state.pendingTaskKeys.length} pending. Resume continues without redoing
-          completed work.
-        </p>
-      ) : null}
-
-      {/* Table area: fills every remaining pixel. The table is the dominant
-          element on screen; seats sit on its edge, not floating apart. */}
+      {/* Table area: every remaining pixel left of the rail. */}
       <section
         aria-label="Round table"
-        className="backroom-vignette relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--bg-elev-1)]"
+        className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
       >
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
@@ -236,10 +170,36 @@ export default function RunPage() {
           </div>
         )}
 
-        {/* Reveal overlays the table corner instead of pushing the page longer,
-            so the single-viewport constraint holds on completed runs too. */}
+        {/* Inline status lines overlay the bottom-left so they never push the
+            table or introduce page scroll. */}
+        <div className="pointer-events-none absolute bottom-2 left-2 z-30 flex max-w-[60%] flex-col gap-1">
+          {state.budgetWarning ? (
+            <p
+              role="status"
+              className="truncate border-l border-[var(--warn)]/60 pl-2 text-[11px] text-[var(--warn)]"
+            >
+              Budget warning, {formatUsd(state.budgetWarning.usedUsd)} of{' '}
+              {formatUsd(state.budgetWarning.limitUsd)} used (
+              {Math.round(state.budgetWarning.pct * 100)}%).
+            </p>
+          ) : null}
+
+          {state.error && state.status === 'failed' ? (
+            <p role="alert" className="truncate border-l border-[var(--danger)]/60 pl-2 text-[11px] text-[var(--danger)]">
+              Run failed ({state.error.code}): {state.error.message}
+            </p>
+          ) : null}
+
+          {state.status === 'paused' ? (
+            <p role="status" className="truncate border-l border-[var(--line-strong)] pl-2 text-[11px] text-[var(--text-dim)]">
+              Paused. {state.pendingTaskKeys.length} pending.
+            </p>
+          ) : null}
+        </div>
+
+        {/* Reveal overlays the table's bottom-left instead of pushing layout. */}
         {showReveal ? (
-          <div className="absolute bottom-2 right-2 top-2 z-40 flex w-[min(340px,38%)] min-h-0 flex-col overflow-hidden rounded-[var(--radius-card)] border border-[var(--gold)]/30 bg-[var(--bg-elev-1)]/96 shadow-[var(--elev-3)] backdrop-blur">
+          <div className="absolute bottom-2 left-2 top-auto z-40 flex max-h-[46%] w-[min(340px,52%)] min-h-0 flex-col overflow-hidden rounded-[3px] border border-[var(--line-strong)] bg-[var(--bg)]/95 backdrop-blur">
             <div className="min-h-0 flex-1 overflow-y-auto">
               <RevealCard
                 reveal={winner}
@@ -253,6 +213,44 @@ export default function RunPage() {
           </div>
         ) : null}
       </section>
+
+      {/* Slim right rail: prompt, generate, current-step dots, stop/abort.
+          Narrow, quiet, generous whitespace between groups. */}
+      <aside
+        aria-label="Run controls"
+        className="flex h-full w-[248px] shrink-0 flex-col gap-6 overflow-y-auto border-l
+                   border-[var(--line)] px-4 py-5"
+      >
+        <Controls
+          controls={controls}
+          seedPrompt={seedPrompt}
+          refineEnabled={refineEnabled}
+          onSeedChange={setSeedPrompt}
+          onRefineChange={setRefineEnabled}
+          onGenerate={() => void handleGenerate()}
+          onPause={() => void act('pause')}
+          onResume={() => void act('resume')}
+          onAbort={() => void act('abort')}
+          onSkipAnimation={flushAll}
+          busy={busy}
+          buffered={activeSeats.length > 0}
+        />
+
+        <div className="border-t border-[var(--line)] pt-5">
+          <p className="mb-3 text-[11px] text-[var(--text-mute)]">Step</p>
+          <StepTimeline
+            step={state.step}
+            completedSteps={state.completedSteps}
+            orientation="rail"
+          />
+        </div>
+
+        <div className="tnum mt-auto flex items-center gap-2 border-t border-[var(--line)] pt-4 text-[11px] text-[var(--text-mute)]">
+          {state.round > 1 ? <span>Round {state.round}</span> : <span>Round 1</span>}
+          {state.failedSeats.length > 0 ? <span>{state.failedSeats.length} failed</span> : null}
+          {winner ? <Badge tone="accent">Winner</Badge> : null}
+        </div>
+      </aside>
 
       <ReasoningDrawer
         agents={agents}

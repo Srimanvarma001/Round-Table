@@ -286,3 +286,86 @@
     0 0 0 1px var(--gold);
   outline: none;
 }
+
+/* ---------------------------------------------------------------------------
+   Wireframe line-art layer: monochrome outlined slots, portrait table, and
+   the hand-drawn sketch bubble. Resting state is light-grey linework on the
+   near-black ground; the warm gold appears only on the active border and
+   the thinking bubble.
+   --------------------------------------------------------------------------- */
+
+.wire-seat:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Hand-drawn bubble: thin outline, transparent fill, slightly irregular
+   organic corners (each corner a different radius, like a quick pen pass)
+   and a faint second-stroke feel via a soft offset shadow. */
+.sketch-bubble {
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  /* Irregular sketch corners — deliberately asymmetric. */
+  border-radius: 14px 16px 13px 17px / 16px 13px 17px 14px;
+  transform: rotate(-0.4deg);
+  padding: 6px 10px;
+  box-shadow: 0.6px 0.8px 0 rgba(236, 230, 217, 0.14);
+}
+
+.sketch-bubble[data-sketch-bubble='thinking'] {
+  background: transparent;
+  transform: rotate(0.5deg);
+  border-radius: 16px 13px 17px 14px / 13px 17px 14px 16px;
+}
+
+.sketch-thinking-text {
+  color: var(--text-dim);
+  letter-spacing: 0.01em;
+}
+
+/* Small pointer tail aimed back at the seat. A rotated square sharing the
+   bubble's border on two sides so it reads as one pen stroke. */
+.sketch-tail {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: var(--bg);
+  border: 0 solid var(--line-strong);
+}
+
+.sketch-tail[data-tail='above'] {
+  left: 50%;
+  bottom: -5px;
+  transform: translateX(-50%) rotate(45deg);
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.sketch-tail[data-tail='below'] {
+  left: 50%;
+  top: -5px;
+  transform: translateX(-50%) rotate(45deg);
+  border-left-width: 1px;
+  border-top-width: 1px;
+}
+
+.sketch-tail[data-tail='left'] {
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%) rotate(45deg);
+  border-right-width: 1px;
+  border-top-width: 1px;
+}
+
+.sketch-tail[data-tail='right'] {
+  top: 50%;
+  left: -5px;
+  transform: translateY(-50%) rotate(45deg);
+  border-left-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.sketch-bubble[data-sketch-bubble='thinking'] .sketch-tail {
+  border-color: rgba(201, 151, 63, 0.55);
+}
