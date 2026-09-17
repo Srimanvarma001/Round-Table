@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { useSettings } from '@/hooks/useSettings';
+import { CityBackground } from '@/components/shell/CityBackground';
 
 const NAV = [
   { href: '/run', label: 'Table' },
@@ -30,8 +31,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   return (
-    <div className="backroom themed-grid flex h-[100dvh] flex-col overflow-hidden">
-      <header className="z-40 h-14 shrink-0 border-b border-[var(--line)] bg-[var(--bg-elev-1)]/95 backdrop-blur">
+    <div className="backroom themed-grid relative flex h-[100dvh] flex-col overflow-hidden">
+      <CityBackground />
+      <header className="relative z-40 h-14 shrink-0 border-b border-[var(--line)] bg-[var(--bg-elev-1)]/95 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-5 px-4">
           <Link href="/run" className="display-face flex items-center gap-2 text-[var(--text)]">
             {/* Eight chips around a ring: the product mark, echoing the table. */}
@@ -80,7 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col overflow-hidden px-4 py-2">
+      <main className="relative z-10 mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col overflow-hidden px-4 py-2">
         {children}
       </main>
     </div>
