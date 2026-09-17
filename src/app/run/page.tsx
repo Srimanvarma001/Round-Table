@@ -6,6 +6,7 @@ import { Controls } from '@/components/run/Controls';
 import { ReasoningDrawer } from '@/components/run/ReasoningDrawer';
 import { RevealCard } from '@/components/run/RevealCard';
 import { StepTimeline } from '@/components/run/StepTimeline';
+import { SideNav } from '@/components/shell/SideNav';
 import { RoundTable } from '@/components/table/RoundTable';
 import { Badge } from '@/components/ui/badge';
 import { useAgents } from '@/hooks/useAgents';
@@ -19,8 +20,8 @@ import type { ProposalScoreDTO } from '@/shared/types';
 /**
  * Wireframe live table: single viewport, no page scroll. The portrait table
  * fills the visual centre; a slim quiet rail (~260px) docked to the right
- * edge carries the prompt, Generate, the current-step dot rail, and the
- * Stop/Abort text links. No top control bar.
+ * edge carries the vertical nav on top, then the prompt, Generate, the
+ * current-step dot rail, and the Stop/Abort text links. No top control bar.
  */
 
 export default function RunPage() {
@@ -214,13 +215,16 @@ export default function RunPage() {
         ) : null}
       </section>
 
-      {/* Slim right rail: prompt, generate, current-step dots, stop/abort.
-          Narrow, quiet, generous whitespace between groups. */}
+      {/* Slim right rail: the nav section on top, then prompt, generate,
+          current-step dots, stop/abort. Narrow, quiet, generous whitespace
+          between groups. */}
       <aside
         aria-label="Run controls"
         className="flex h-full w-[248px] shrink-0 flex-col gap-6 overflow-y-auto border-l
                    border-[var(--line)] px-4 py-5"
       >
+        <SideNav variant="panel" />
+
         <Controls
           controls={controls}
           seedPrompt={seedPrompt}

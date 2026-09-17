@@ -226,8 +226,8 @@
 
 /* The pale sky needs dimming so light UI text stays legible: a uniform
    theme-ground wash over the whole frame, solid `var(--bg)` at the very top
-   (behind the header) fading out over the skyline, and a soft warm shade at
-   the very bottom. The art stays visible but never competes with seats. */
+   fading out over the skyline, and a soft warm shade at the very bottom.
+   The art stays visible but never competes with seats or the nav rail. */
 .city-bg-scrim {
   background:
     linear-gradient(

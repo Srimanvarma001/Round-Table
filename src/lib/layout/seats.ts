@@ -190,9 +190,12 @@ export const LAYOUT_BREAKPOINTS: readonly LayoutBreakpoint[] = [
  * 0 top, 1 right-top, 2 right-middle, 3 right-bottom, 4 bottom,
  * 5 left-bottom, 6 left-middle, 7 left-top.
  *
- * Coordinates are percentages of the table-area container (0-100), kept well
- * clear of the central portrait rectangle (x ~37-63, y ~21-79) so bubbles
- * never overlap neighbouring seats.
+ * Coordinates are percentages of the table-area container (0-100). The group
+ * is kept tight and centred — side columns at 31/69, rows at 30/50/70, head
+ * and foot at 13/87 — so the eight characters sit close around the central
+ * portrait rectangle (x ~36-64, y ~21-79) as one cohesive table instead of
+ * spreading across the full width and height. Bubbles still point outward,
+ * so they never overlap neighbouring seats.
  */
 export type RectSeatSide = 'top' | 'right' | 'bottom' | 'left';
 
@@ -209,14 +212,14 @@ export function placeRectSeats(n: number): RectSeatPlacement[] {
   // Canonical 8-seat wireframe. For other counts fall back to repeating the
   // side pattern so previews and tests never crash.
   const canonical: RectSeatPlacement[] = [
-    { x: 50, y: 7, side: 'top', bubbleSide: 'above' },
-    { x: 81, y: 26, side: 'right', bubbleSide: 'right' },
-    { x: 81, y: 50, side: 'right', bubbleSide: 'right' },
-    { x: 81, y: 74, side: 'right', bubbleSide: 'right' },
-    { x: 50, y: 93, side: 'bottom', bubbleSide: 'below' },
-    { x: 19, y: 74, side: 'left', bubbleSide: 'left' },
-    { x: 19, y: 50, side: 'left', bubbleSide: 'left' },
-    { x: 19, y: 26, side: 'left', bubbleSide: 'left' },
+    { x: 50, y: 13, side: 'top', bubbleSide: 'above' },
+    { x: 69, y: 30, side: 'right', bubbleSide: 'right' },
+    { x: 69, y: 50, side: 'right', bubbleSide: 'right' },
+    { x: 69, y: 70, side: 'right', bubbleSide: 'right' },
+    { x: 50, y: 87, side: 'bottom', bubbleSide: 'below' },
+    { x: 31, y: 70, side: 'left', bubbleSide: 'left' },
+    { x: 31, y: 50, side: 'left', bubbleSide: 'left' },
+    { x: 31, y: 30, side: 'left', bubbleSide: 'left' },
   ];
   if (n === 8) return canonical;
   return Array.from({ length: n }, (_, i) => canonical[i % canonical.length]);

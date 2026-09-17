@@ -11,11 +11,12 @@ export function TableSurface({ step }: { step: StepName }) {
   const active = step === 'reveal' || step === 'vote';
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
-      {/* Outer portrait rectangle — the table. */}
+      {/* Outer portrait rectangle — the table. Sized to sit just inside the
+          tightened seat columns (31/69) so the characters hug the rim. */}
       <div
         className="wire-table"
         style={{
-          width: 'min(27%, 300px)',
+          width: 'min(28%, 360px)',
           height: 'min(58%, 480px)',
           border: '1px solid var(--line-strong)',
           borderRadius: 3,
