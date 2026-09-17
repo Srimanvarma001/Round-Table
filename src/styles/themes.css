@@ -12,7 +12,7 @@
    token unit test asserts that, including 3:1 contrast of every seat accent
    against --table-mid.
 
-   Palette: deep charcoal with warm undertone, whiskey-gold primary accent,
+   Palette: deep charcoal with warm undertone, sage-jade primary accent,
    blood-red used sparingly. No cool blues anywhere. No pure black or white.
    =========================================================================== */
 
@@ -27,10 +27,10 @@
   --line: #2a241c;
   --line-strong: #453a2a;
   --text: #ece6d9;
-  --text-dim: #b3a78f;
-  --text-mute: #8a8378;
+  --text-dim: #c9bda8;
+  --text-mute: #a89f8d;
   --danger: #d3755a;
-  --warn: #c9973f;
+  --warn: #cf8f4a;
   --ok: #7fa37a;
 
   /* table surface — dark green felt: lit centre, dark warm edge */
@@ -38,29 +38,29 @@
   --table-mid: #1e1913;
   --table-edge: #0d0b08;
   --table-shadow: rgba(0, 0, 0, 0.78);
-  --table-pool: #c9973f;
-  --table-ring: #6b5a36;
-  --rim-hi: #e8d5a3;
+  --table-pool: #7fb392;
+  --table-ring: #4f6b55;
+  --rim-hi: #c9e2d2;
   --rim-lo: #0d0b08;
 
   /* seat accents — desaturated, warm-compatible, all 3:1 vs --table-mid */
-  --seat-1: #c9973f; /* You, whiskey gold */
+  --seat-1: #7fb392; /* You, jade */
   --seat-2: #6b8f6b; /* Pragmatist, olive */
   --seat-3: #8b5e3c; /* Wildcard, tobacco */
   --seat-4: #6f9a9a; /* Market Analyst, slate teal (lightened, hue kept) */
-  --seat-5: #9c7c4a; /* Technical Architect, brass */
+  --seat-5: #b08287; /* Technical Architect, dusty rose */
   --seat-6: #b1503f; /* Contrarian, blood (lightened for legibility) */
   --seat-7: #8577b0; /* Mentor, muted plum */
   --seat-8: #a89a7e; /* Trend-Watcher, stone */
 
-  --gold: #c9973f;
-  --gold-hi: #e8d5a3;
-  --gold-deep: #9c7c4a;
+  --gold: #7fb392;
+  --gold-hi: #c9e2d2;
+  --gold-deep: #567d63;
   --blood: #7a1f1f;
   --recess-bg: #0f0d0a;
   --denom-bg: #171310;
 
-  --grid: rgba(201, 151, 63, 0.045);
+  --grid: rgba(127, 179, 146, 0.05);
 
   /* Elevation reads as warm surface lightness plus soft black shadow. */
   --elev-1: 0 6px 18px rgba(0, 0, 0, 0.45);
@@ -86,10 +86,10 @@
   --line: #33291d;
   --line-strong: #4f4130;
   --text: #ece6d9;
-  --text-dim: #b3a78f;
-  --text-mute: #8a8378;
+  --text-dim: #c9bda8;
+  --text-mute: #a89f8d;
   --danger: #d3755a;
-  --warn: #c9973f;
+  --warn: #cf8f4a;
   --ok: #7fa37a;
 
   /* aged mahogany variant — still a dark backroom, never cream */
@@ -97,28 +97,28 @@
   --table-mid: #241c14;
   --table-edge: #120e0a;
   --table-shadow: rgba(0, 0, 0, 0.7);
-  --table-pool: #c9973f;
-  --table-ring: #6b5a36;
-  --rim-hi: #e8d5a3;
+  --table-pool: #7fb392;
+  --table-ring: #4f6b55;
+  --rim-hi: #c9e2d2;
   --rim-lo: #120e0a;
 
-  --seat-1: #c9973f;
+  --seat-1: #7fb392;
   --seat-2: #6b8f6b;
   --seat-3: #8b5e3c;
   --seat-4: #6f9a9a;
-  --seat-5: #9c7c4a;
+  --seat-5: #b08287;
   --seat-6: #b1503f;
   --seat-7: #8577b0;
   --seat-8: #a89a7e;
 
-  --gold: #c9973f;
-  --gold-hi: #e8d5a3;
-  --gold-deep: #9c7c4a;
+  --gold: #7fb392;
+  --gold-hi: #c9e2d2;
+  --gold-deep: #567d63;
   --blood: #7a1f1f;
   --recess-bg: #15110c;
   --denom-bg: #1b1611;
 
-  --grid: rgba(201, 151, 63, 0.05);
+  --grid: rgba(127, 179, 146, 0.05);
 
   --elev-1: 0 6px 18px rgba(0, 0, 0, 0.45);
   --elev-2: 0 10px 28px rgba(0, 0, 0, 0.55);
@@ -165,7 +165,7 @@
   --seat-diameter: clamp(48px, 6.4vw, 80px);
   --drawer-width: 480px;
 
-  /* Focus ring: 2px gold at a 2px offset, never removed. */
+  /* Focus ring: 2px accent at a 2px offset, never removed. */
   --focus-ring: 2px solid var(--gold);
   --focus-offset: 2px;
 }
@@ -185,7 +185,7 @@
 
 .backroom {
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(201, 151, 63, 0.07), transparent 55%),
+    radial-gradient(120% 90% at 50% 0%, rgba(127, 179, 146, 0.06), transparent 55%),
     radial-gradient(140% 110% at 50% 115%, rgba(0, 0, 0, 0.55), transparent 60%),
     var(--bg);
 }
@@ -425,5 +425,5 @@
 }
 
 .sketch-bubble[data-sketch-bubble='thinking'] .sketch-tail {
-  border-color: rgba(201, 151, 63, 0.55);
+  border-color: rgba(127, 179, 146, 0.55);
 }

@@ -21,8 +21,8 @@ export function TableSurface({ step }: { step: StepName }) {
           border: '1px solid var(--line-strong)',
           borderRadius: 3,
           background: 'transparent',
-          boxShadow: active ? '0 0 0 1px rgba(201,151,63,0.18)' : 'none',
-          borderColor: active ? 'rgba(201,151,63,0.45)' : 'var(--line-strong)',
+          boxShadow: active ? '0 0 0 1px rgba(127,179,146,0.18)' : 'none',
+          borderColor: active ? 'rgba(127,179,146,0.45)' : 'var(--line-strong)',
         }}
       >
         {/* Inner hairline — a second sketch pass, slightly inset, like the

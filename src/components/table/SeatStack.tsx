@@ -54,7 +54,7 @@ export function SeatStack({
               className="flex w-full items-center gap-3 rounded-[3px] border bg-transparent px-3 py-2 text-left"
               style={{
                 borderColor: thinking
-                  ? 'rgba(201,151,63,0.55)'
+                  ? 'rgba(127,179,146,0.55)'
                   : failed
                     ? 'var(--danger)'
                     : 'var(--line-strong)',

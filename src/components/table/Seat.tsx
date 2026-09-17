@@ -144,7 +144,7 @@ export function Seat({
                 y: '-50%',
                 borderRadius: '50%',
                 background:
-                  'radial-gradient(circle, rgba(201,151,63,0.30) 0%, rgba(201,151,63,0.12) 45%, transparent 72%)',
+                  'radial-gradient(circle, rgba(127,179,146,0.30) 0%, rgba(127,179,146,0.12) 45%, transparent 72%)',
               }}
               animate={{ opacity: [0.3, 0.9, 0.3] }}
               transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
@@ -166,7 +166,7 @@ export function Seat({
                 objectFit: 'contain',
                 imageRendering: 'auto',
                 filter: isThinking
-                  ? 'drop-shadow(0 0 12px rgba(201,151,63,0.45)) drop-shadow(0 1px 2px rgba(0,0,0,0.45))'
+                  ? 'drop-shadow(0 0 12px rgba(127,179,146,0.45)) drop-shadow(0 1px 2px rgba(0,0,0,0.45))'
                   : 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))',
               }}
             />

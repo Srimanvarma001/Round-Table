@@ -58,7 +58,7 @@ export function SpeechBubble({
       ].join(' ')}
       style={
         thinking
-          ? { borderColor: 'rgba(201,151,63,0.55)' }
+          ? { borderColor: 'rgba(127,179,146,0.55)' }
           : { borderColor: `${accent}44` }
       }
     >

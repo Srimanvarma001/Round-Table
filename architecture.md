@@ -5,6 +5,7 @@
 Version 1.1 · Status: Approved for implementation · Target: v1 complete (all six milestones)
 
 **Changelog**
+- 1.4 — Accent recolour by owner decision: the whiskey-gold primary accent (`#C9973F`) is replaced by a sage-jade family — `--gold`/`--seat-1` `#7FB392`, `--gold-hi` `#C9E2D2`, `--gold-deep` `#567D63`, `--table-pool` `#7FB392`, `--table-ring` `#4F6B55`, `--rim-hi` `#C9E2D2`; seat 5 brass → dusty rose `#B08287`; `--warn` softened to amber `#CF8F4A`; `--text-dim` `#C9BDA8` and `--text-mute` `#A89F8D` brightened for legibility. Token names are unchanged, so components keep referencing them; the hardcoded `rgba(201,151,63,…)` literals in the table components are recoloured to `rgba(127,179,146,…)`. The theme-token unit test still governs the key list and the 3:1 seat-contrast rule.
 - 1.3 — Hearth theme contrast fix (2026-09-11): seats 1, 2, 4 and 8 failed the section 16.4 3:1 check against the table surface; darkened with hue preserved, per the section's own rule. Covered by the theme-token unit test.
 - 1.2 — DeepSeek removed by owner decision: every seat, the reveal synthesis and profile extraction run on GLM. Provider tables, environment variables and the outage story updated; docs/PROVIDER-NOTES.md records the verified live behaviour.
 - 1.1 — Section 4.4 and Section 16 rewritten as a full UI design specification: seat layout math, avatar system, motion specs, theme tokens, responsive behaviour. Agent schema extended with avatar fields.

@@ -84,7 +84,7 @@ export function Controls({
             type="button"
             onClick={onResume}
             className="flex w-full items-center justify-center gap-1.5 rounded-[3px] border
-                       border-[rgba(201,151,63,0.5)] px-3 py-1.5 text-[12px] text-[var(--gold-hi)]"
+                       border-[rgba(127,179,146,0.5)] px-3 py-1.5 text-[var(--gold-hi)]"
           >
             Resume
           </button>

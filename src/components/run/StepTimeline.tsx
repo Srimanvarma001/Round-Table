@@ -47,12 +47,12 @@ export function StepTimeline({
                 className={[
                   'tnum flex h-3.5 w-3.5 items-center justify-center rounded-full border text-[9px]',
                   active
-                    ? 'border-[rgba(201,151,63,0.7)] text-[var(--gold-hi)]'
+                    ? 'border-[rgba(127,179,146,0.7)] text-[var(--gold-hi)]'
                     : complete
                       ? 'border-[var(--line-strong)] text-[var(--text-dim)]'
                       : 'border-[var(--line)] text-transparent',
                 ].join(' ')}
-                style={active ? { boxShadow: '0 0 8px rgba(201,151,63,0.35)' } : undefined}
+                style={active ? { boxShadow: '0 0 8px rgba(127,179,146,0.35)' } : undefined}
               >
                 {complete && !active ? (
                   <Check className="h-2 w-2" aria-label="complete" />
@@ -134,7 +134,7 @@ export function StepTimeline({
               ].join(' ')}
               style={
                 active
-                  ? { boxShadow: '0 0 14px rgba(201,151,63,0.45)' }
+                  ? { boxShadow: '0 0 14px rgba(127,179,146,0.45)' }
                   : undefined
               }
               title={`Step ${i + 1} of ${STEP_NAMES.length}, ${name}, ${status}`}
