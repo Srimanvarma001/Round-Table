@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider, Switch } from '@/components/ui/slider';
+import { CHARACTER_KEYS, characterImageFor } from '@/lib/avatars/characters';
 import { cn, humanise } from '@/lib/utils';
 import { AVATAR_STYLES, PROVIDERS, type AvatarStyle, type ProviderKey } from '@/shared/constants';
 import type { AgentDTO } from '@/shared/types';
@@ -111,6 +112,8 @@ export function SeatForm({
               accent={accent}
               size={58}
               dimmed={!draft.enabled}
+              seed={draft.avatarSeed}
+              seatKey={draft.seatKey}
             />
           </span>
         </span>
@@ -277,6 +280,8 @@ export function SeatForm({
                   name={draft.name}
                   accent={accent}
                   size={26}
+                  seed={draft.avatarSeed}
+                  seatKey={draft.seatKey}
                 />
                 <span>{humanise(style)}</span>
                 {style === 'dicebear' ? (
@@ -286,6 +291,44 @@ export function SeatForm({
             ))}
           </div>
         </Field>
+
+        {draft.avatarStyle === 'pixel' ? (
+          <Field
+            label="Character"
+            htmlFor="seat-character"
+            className="md:col-span-2"
+            hint="The sprite this seat wears at the table. `3_knight` is the Me Agent's default; any seat can wear any of the eight."
+          >
+            <div className="flex flex-wrap gap-2" id="seat-character">
+              {CHARACTER_KEYS.map((key) => {
+                const selected = draft.avatarSeed === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => onChange({ avatarSeed: key })}
+                    className={cn(
+                      'flex items-center gap-2 rounded-[var(--radius-card)] border px-2.5 py-1.5 text-[12.5px] transition-colors',
+                      selected
+                        ? 'border-[var(--gold)] bg-[var(--bg-elev-3)] text-[var(--text)]'
+                        : 'border-[var(--line)] text-[var(--text-dim)] hover:border-[var(--line-strong)]',
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={characterImageFor(key)}
+                      alt=""
+                      draggable={false}
+                      className="h-7 w-7 rounded-[var(--radius-pill)] object-contain"
+                    />
+                    <span>{humanise(key)}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Field>
+        ) : null}
 
         {draft.avatarStyle === 'lucide' ? (
           <Field

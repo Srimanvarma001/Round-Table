@@ -131,6 +131,8 @@ export function ReasoningDrawer({
                       name={active.name}
                       accent={`var(${active.accentToken})`}
                       size={44}
+                      seed={active.avatarSeed}
+                      seatKey={active.seatKey}
                     />
                   </motion.div>
                   <div className="min-w-0 flex-1">

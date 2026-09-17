@@ -75,7 +75,7 @@ export const agents = sqliteTable(
     modelId: text('model_id').notNull(),
     temperature: real('temperature').notNull().default(0.7),
     weight: real('weight').notNull(),
-    avatarStyle: text('avatar_style', { enum: ['dicebear', 'lucide', 'initials'] })
+    avatarStyle: text('avatar_style', { enum: ['dicebear', 'lucide', 'initials', 'pixel'] })
       .notNull()
       .default('dicebear'),
     avatarSeed: text('avatar_seed').notNull().default(''),

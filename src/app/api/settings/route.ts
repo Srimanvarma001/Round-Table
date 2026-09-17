@@ -24,7 +24,7 @@ const patchSchema = z
     refineEnabled: z.boolean().optional(),
     maxCritiquesPerAgent: z.number().int().min(0).optional(),
     reasoningPanelEnabled: z.boolean().optional(),
-    defaultAvatarStyle: z.enum(['dicebear', 'lucide', 'initials']).optional(),
+    defaultAvatarStyle: z.enum(['dicebear', 'lucide', 'initials', 'pixel']).optional(),
     temperatureBySeatClass: z
       .object({ me: z.number(), lens: z.number() })
       .optional(),

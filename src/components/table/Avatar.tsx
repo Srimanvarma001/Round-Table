@@ -13,17 +13,20 @@ import {
 } from 'lucide-react';
 
 import type { AvatarStyle } from '@/shared/constants';
+import { seatCharacterImage } from '@/lib/avatars/characters';
 
 /**
  * Avatar system: wax-seal medallions, never photographic faces.
  *
  * Every style renders as a solid object sitting on the felt: an accent fill
  * with an embossed ring and a drop shadow (the `chip-disc` layer in themes.css
- * supplies the shadow and inset highlight). Three styles, selectable per seat:
- *  1. `dicebear` — abstract generative geometry, deterministic from a seed,
+ * supplies the shadow and inset highlight). Four styles, selectable per seat:
+ *  1. `pixel`    — character sprite from `public/characters/`, selected by
+ *     `avatarSeed` (e.g. `3_knight`). Cartoon art, rendered smooth.
+ *  2. `dicebear` — abstract generative geometry, deterministic from a seed,
  *     generated on the SERVER and cached. Mounted inside the medallion frame.
- *  2. `lucide`   — one persona glyph stamped into the wax.
- *  3. `initials` — two-letter monogram. Also the graceful degradation when SVG
+ *  3. `lucide`   — one persona glyph stamped into the wax.
+ *  4. `initials` — two-letter monogram. Also the graceful degradation when SVG
  *     generation fails. Never leave a seat without an avatar.
  */
 
@@ -50,6 +53,13 @@ export interface AvatarProps {
   size?: number;
   /** Rendered at 40% opacity for the `disabled` seat state. */
   dimmed?: boolean;
+  /**
+   * Character key for the `pixel` style (e.g. `3_knight`). Falls back to the
+   * seat default when it is not a known sprite. Pass `avatarSeed` here.
+   */
+  seed?: string;
+  /** Seat key fallback, so legacy seeds still resolve to a sensible sprite. */
+  seatKey?: string;
 }
 
 export function Avatar({
@@ -60,6 +70,8 @@ export function Avatar({
   accent,
   size = 44,
   dimmed = false,
+  seed,
+  seatKey,
 }: AvatarProps) {
   const frame = {
     width: size,
@@ -69,6 +81,31 @@ export function Avatar({
     // embossed ring highlight from the chip-ring parent.
     background: `radial-gradient(circle at 50% 32%, color-mix(in srgb, ${accent} 62%, var(--text) 8%), color-mix(in srgb, ${accent} 78%, var(--bg) 22%) 68%, color-mix(in srgb, ${accent} 55%, var(--bg) 45%))`,
   } as const;
+
+  if (style === 'pixel') {
+    const src = seatCharacterImage(seed, seatKey);
+    return (
+      <div
+        aria-hidden="true"
+        className="flex items-center justify-center overflow-hidden rounded-[var(--radius-pill)]"
+        style={frame}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt=""
+          draggable={false}
+          style={{
+            width: size * 0.92,
+            height: size * 0.92,
+            objectFit: 'contain',
+            imageRendering: 'auto',
+            filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.45))',
+          }}
+        />
+      </div>
+    );
+  }
 
   if (style === 'dicebear' && svg) {
     // The SVG is server-generated from a trusted, deterministic seed; it is

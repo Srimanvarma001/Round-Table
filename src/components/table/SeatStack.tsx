@@ -2,7 +2,10 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { Avatar } from '@/components/table/Avatar';
 import type { SeatLiveState } from '@/hooks/useRunStream';
+import type { AvatarStyle } from '@/shared/constants';
+import { seatCharacterImage } from '@/lib/avatars/characters';
 import { truncate } from '@/lib/utils';
 import type { AgentDTO } from '@/shared/types';
 
@@ -60,8 +63,40 @@ export function SeatStack({
             >
               <span
                 aria-hidden="true"
-                className="block h-8 w-14 shrink-0 rounded-[2px] border border-[var(--line-strong)]"
-              />
+                className="relative block h-9 w-14 shrink-0"
+              >
+                {(agent.avatarStyle as AvatarStyle) === 'pixel' ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={seatCharacterImage(agent.avatarSeed, agent.seatKey)}
+                    alt=""
+                    draggable={false}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      margin: 'auto',
+                      width: 34,
+                      height: 34,
+                      objectFit: 'contain',
+                      imageRendering: 'auto',
+                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))',
+                    }}
+                  />
+                ) : (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Avatar
+                      style={agent.avatarStyle as AvatarStyle}
+                      svg={agent.avatarSvg}
+                      iconName={agent.iconName}
+                      name={agent.name}
+                      accent={`var(${agent.accentToken})`}
+                      size={30}
+                      seed={agent.avatarSeed}
+                      seatKey={agent.seatKey}
+                    />
+                  </span>
+                )}
+              </span>
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
                   <span className="truncate text-[12px] text-[var(--text-dim)]">

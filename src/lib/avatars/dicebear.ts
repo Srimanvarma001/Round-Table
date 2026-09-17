@@ -8,10 +8,12 @@ import type { AvatarStyle } from '@/shared/constants';
 /**
  * Avatar rendering, section 16.3.
  *
- * Three styles, stored per seat in `agents.avatar_style`:
+ * Four styles, stored per seat in `agents.avatar_style`:
  *   `dicebear` (default)  — abstract generative geometry from `@dicebear/*`
  *   `lucide`              — one persona icon in an accent-tinted circle
  *   `initials`            — two-letter monogram, also the degradation path
+ *   `pixel`               — pixel-art sprite from `public/characters/`,
+ *                         resolved client-side, needs no SVG generation
  *
  * HARD RULE (section 16.3): no photographic faces and no realistic human
  * illustration. The table is a council of lenses, not eight people. The
@@ -162,6 +164,7 @@ export function resolveAvatarStyle(
   if (isBannedStyle(normalised)) return 'initials';
   if (normalised === 'lucide') return 'lucide';
   if (normalised === 'initials') return 'initials';
+  if (normalised === 'pixel') return 'pixel';
 
   try {
     renderAvatarSvg({ style: DEFAULT_DICEBEAR_STYLE, seed: seatSeed, accent: PROBE_ACCENT });
@@ -296,6 +299,11 @@ export function renderSeatAvatar(input: SeatAvatarInput): string {
   const style = resolveAvatarStyle(input.style, input.seed);
 
   if (style === 'lucide') return renderLucideAvatar(input.iconName, input.accent);
+
+  // Pixel sprites are static files resolved client-side; nothing to generate
+  // or cache. An empty cache keeps the row honest: the client renders
+  // `/characters/<seed>.png` from `avatarSeed`.
+  if (style === 'pixel') return '';
 
   if (style === 'dicebear') {
     try {

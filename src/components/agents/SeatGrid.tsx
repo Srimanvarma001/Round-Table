@@ -68,6 +68,8 @@ export function SeatGrid({ agents, normalised, selectedId, dirtyIds, onSelect }:
                   accent={accent}
                   size={34}
                   dimmed={!agent.enabled}
+                  seed={agent.avatarSeed}
+                  seatKey={agent.seatKey}
                 />
               </span>
 

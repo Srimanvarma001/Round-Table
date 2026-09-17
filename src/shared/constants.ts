@@ -57,7 +57,7 @@ export type CritiqueStance = (typeof CRITIQUE_STANCES)[number];
 export const SEAT_STATES = ['idle', 'thinking', 'spoken', 'failed', 'disabled'] as const;
 export type SeatState = (typeof SEAT_STATES)[number];
 
-export const AVATAR_STYLES = ['dicebear', 'lucide', 'initials'] as const;
+export const AVATAR_STYLES = ['dicebear', 'lucide', 'initials', 'pixel'] as const;
 export type AvatarStyle = (typeof AVATAR_STYLES)[number];
 
 /** Stable seat keys. The Me Agent is always `seat_me`. */

@@ -41,7 +41,7 @@ const createSchema = z.object({
   modelId: z.string().trim().min(1).max(120).default(GLM_MODEL_ID),
   temperature: z.number().min(0).max(2).default(0.7),
   weight: z.number().min(0).max(10).default(0.75 / 7),
-  avatarStyle: z.enum(['dicebear', 'lucide', 'initials']).default('dicebear'),
+  avatarStyle: z.enum(['dicebear', 'lucide', 'initials', 'pixel']).default('pixel'),
   avatarSeed: z.string().trim().max(120).optional(),
   iconName: z.string().trim().max(60).optional(),
   accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#C9973F'),

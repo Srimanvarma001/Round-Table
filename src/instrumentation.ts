@@ -19,5 +19,18 @@ export async function register(): Promise<void> {
     } catch (err) {
       logger.warn({ err }, 'instrumentation: boot sweep failed; continuing anyway');
     }
+
+    // One-time: flip seats seeded before the character sprites existed over to
+    // the `pixel` style with their seat character (`3_knight` for the Me
+    // Agent). Settings-gated, so it never rewrites a user's later edits.
+    try {
+      const { migrateSeatsToCharacters } = await import('@/lib/avatars/migrate');
+      const migrated = migrateSeatsToCharacters(getDb());
+      if (migrated > 0) {
+        logger.info({ migrated }, 'instrumentation: migrated seats to character avatars');
+      }
+    } catch (err) {
+      logger.warn({ err }, 'instrumentation: character migration failed; continuing anyway');
+    }
   }
 }

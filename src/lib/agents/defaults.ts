@@ -81,8 +81,8 @@ export const DEFAULT_TEMPERATURE_BY_SEAT_CLASS = {
   lens: 0.7,
 } as const;
 
-/** Seats default to the generative geometric style, section 16.3. */
-export const DEFAULT_AVATAR_STYLE: AvatarStyle = 'dicebear';
+/** Seats default to the character sprites in `public/characters/`. */
+export const DEFAULT_AVATAR_STYLE: AvatarStyle = 'pixel';
 
 /**
  * Section 7.1: the Me Agent's seat label is the `users.display_name`. The seed
@@ -193,7 +193,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.me,
     weight: DEFAULT_ME_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: ME_SEAT_KEY,
+    avatarSeed: '3_knight',
     accentColor: '#C9973F',
     accentToken: '--seat-1',
     iconName: 'user-round',
@@ -210,7 +210,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_pragmatist',
+    avatarSeed: '1_knight',
     accentColor: '#6B8F6B',
     accentToken: '--seat-2',
     iconName: 'hammer',
@@ -227,7 +227,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_wildcard',
+    avatarSeed: '2_fairy',
     accentColor: '#8B5E3C',
     accentToken: '--seat-3',
     iconName: 'dices',
@@ -244,7 +244,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_market_analyst',
+    avatarSeed: '1_pirate',
     accentColor: '#6F9A9A',
     accentToken: '--seat-4',
     iconName: 'trending-up',
@@ -261,7 +261,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_technical_architect',
+    avatarSeed: '2_knight',
     accentColor: '#9C7C4A',
     accentToken: '--seat-5',
     iconName: 'blocks',
@@ -278,7 +278,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_contrarian',
+    avatarSeed: '3_pirate',
     accentColor: '#B1503F',
     accentToken: '--seat-6',
     iconName: 'swords',
@@ -295,7 +295,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_mentor',
+    avatarSeed: '3_fairy',
     accentColor: '#8577B0',
     accentToken: '--seat-7',
     iconName: 'compass',
@@ -312,7 +312,7 @@ export const DEFAULT_SEATS: readonly DefaultSeat[] = [
     temperature: DEFAULT_TEMPERATURE_BY_SEAT_CLASS.lens,
     weight: DEFAULT_LENS_WEIGHT,
     avatarStyle: DEFAULT_AVATAR_STYLE,
-    avatarSeed: 'seat_trend_watcher',
+    avatarSeed: '2_pirate',
     accentColor: '#A89A7E',
     accentToken: '--seat-8',
     iconName: 'radar',

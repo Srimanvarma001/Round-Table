@@ -3,6 +3,7 @@ import 'server-only';
 import { z } from 'zod';
 
 import { renderSeatAvatar } from '@/lib/avatars/dicebear';
+import { randomCharacterKey } from '@/lib/avatars/characters';
 import { getDb } from '@/lib/db/client';
 import { deleteAgent, getAgent, updateAgent } from '@/lib/db/queries/agents';
 import { fail, ok, parseBody, toAgentDTO } from '../../_lib/http';
@@ -22,7 +23,7 @@ const patchSchema = z
     modelId: z.string().trim().min(1).max(120).optional(),
     temperature: z.number().min(0).max(2).optional(),
     weight: z.number().min(0).max(10).optional(),
-    avatarStyle: z.enum(['dicebear', 'lucide', 'initials']).optional(),
+    avatarStyle: z.enum(['dicebear', 'lucide', 'initials', 'pixel']).optional(),
     avatarSeed: z.string().trim().min(1).max(120).optional(),
     iconName: z.string().trim().min(1).max(60).optional(),
     accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(),
@@ -46,13 +47,25 @@ export async function PUT(request: Request, { params }: Params): Promise<Respons
 
   const { rerollAvatar, ...patch } = body;
   const style = patch.avatarStyle ?? existing.avatarStyle;
-  const seed = patch.avatarSeed ?? existing.avatarSeed;
+  let seed = patch.avatarSeed ?? existing.avatarSeed;
   const accent = patch.accentColor ?? existing.accentColor;
   const icon = patch.iconName ?? existing.iconName;
   const name = patch.name ?? existing.name;
 
+  if (rerollAvatar) {
+    // A reroll must change what is rendered: both renders are deterministic
+    // from the seed, so regenerating alone would be a no-op. A pixel seat
+    // swaps to a different character; a dicebear seat takes a fresh seed.
+    if (style === 'pixel') {
+      seed = randomCharacterKey(existing.avatarSeed);
+    } else if (style === 'dicebear') {
+      seed = `${existing.seatKey}-${globalThis.crypto.randomUUID().slice(0, 8)}`;
+    }
+  }
+
   const updated = updateAgent(db, id, {
     ...patch,
+    ...(rerollAvatar ? { avatarSeed: seed } : {}),
     // An avatar change (style, seed, reroll, or the accent it is drawn in)
     // regenerates the cached SVG; a pure text edit leaves it alone.
     avatarSvgCache:

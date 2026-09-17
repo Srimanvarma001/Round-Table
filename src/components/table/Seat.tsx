@@ -2,21 +2,22 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 
+import { Avatar } from '@/components/table/Avatar';
 import { SpeechBubble } from '@/components/table/SpeechBubble';
 import { ThoughtCloud } from '@/components/table/ThoughtCloud';
 import type { RectSeatPlacement } from '@/lib/layout/seats';
 import type { SeatLiveState } from '@/hooks/useRunStream';
-import type { SeatState } from '@/shared/constants';
+import type { AvatarStyle, SeatState } from '@/shared/constants';
+import { seatCharacterImage } from '@/lib/avatars/characters';
 import { truncate } from '@/lib/utils';
 import type { AgentDTO } from '@/shared/types';
 
 /**
- * Wireframe seat: a quiet outlined rectangular slot around the table.
- *
- * Resting state is monochrome linework only — thin border, transparent fill,
- * no avatar. The active seat picks up a faint warm-gold border tint. Thinking
- * renders the hand-drawn sketch bubble; spoken renders a one-line summary in
- * the same outlined style. Clicking opens the reasoning drawer.
+ * Seat at the table: the character stands freely — no box — with its name and
+ * vote weight under it. Thinking reads as a warm glow breathing behind the
+ * character plus the hand-drawn sketch bubble; spoken renders a one-line
+ * summary; disabled dims the character and strikes the name. Clicking opens
+ * the reasoning drawer.
  *
  * Five states, driven by the run reducer, never by local component state:
  *   idle | thinking | spoken | failed | disabled
@@ -46,8 +47,12 @@ export interface SeatProps {
   placement?: RectSeatPlacement | null;
 }
 
+/** Horizontal spacer for the seat block; the character sizes itself. */
 const SLOT_W = 116;
-const SLOT_H = 62;
+/** Character sprite size at the table (`pixel` style). */
+const SEAT_SPRITE_PX = 68;
+/** Medallion size at the table for the non-pixel styles. */
+const SEAT_MEDALLION_PX = 48;
 
 export function Seat({
   agent,
@@ -68,7 +73,6 @@ export function Seat({
 }: SeatProps) {
   void auraDelay;
   void diameter;
-  void reducedMotion;
   void drawerOpenForSeat;
   void layoutIdPrefix;
 
@@ -93,18 +97,6 @@ export function Seat({
 
   const take = live?.finalText || live?.visibleText || '';
 
-  const borderColor = isFailed
-    ? 'var(--danger)'
-    : isDisabled
-      ? 'var(--line)'
-      : isThinking
-        ? 'rgba(201,151,63,0.65)'
-        : isYou
-          ? 'rgba(201,151,63,0.45)'
-          : isSpoken
-            ? 'var(--text-mute)'
-            : 'var(--line-strong)';
-
   return (
     <div
       className="absolute"
@@ -125,23 +117,82 @@ export function Seat({
         className="wire-seat group relative mx-auto flex w-fit flex-col items-center gap-1.5 bg-transparent"
         style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
       >
-        {/* The slot: simple outlined rectangle, transparent fill. You gets a
-            slightly thicker border; active gets the faint gold tint. */}
+        {/* The seat: the character stands freely, no box. The sprite renders
+            for the `pixel` style (every seeded seat's default); any other
+            style renders the medallion the rest of the app uses, so the table
+            never disagrees with the drawer. Disabled dims the whole seat. */}
         <span
           aria-hidden="true"
-          className="block transition-colors"
+          className="relative block"
           style={{
             width: SLOT_W,
-            height: SLOT_H,
-            border: `${isYou ? 1.5 : 1}px solid ${borderColor}`,
-            borderRadius: 3,
-            background: 'transparent',
+            height: SEAT_SPRITE_PX,
             opacity: isDisabled ? 0.45 : 1,
-            boxShadow: isThinking
-              ? '0 0 0 1px rgba(201,151,63,0.15), 0 0 18px rgba(201,151,63,0.10)'
-              : 'none',
           }}
-        />
+        >
+          {/* Thinking: a warm glow breathing behind the character (opacity
+              only, never under reduced motion). Rendered before the sprite so
+              it paints behind it without z-index juggling. */}
+          {isThinking && !reducedMotion ? (
+            <motion.span
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-1/2"
+              style={{
+                width: SLOT_W + 16,
+                height: SEAT_SPRITE_PX + 28,
+                x: '-50%',
+                y: '-50%',
+                borderRadius: '50%',
+                background:
+                  'radial-gradient(circle, rgba(201,151,63,0.30) 0%, rgba(201,151,63,0.12) 45%, transparent 72%)',
+              }}
+              animate={{ opacity: [0.3, 0.9, 0.3] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          ) : null}
+
+          {(agent.avatarStyle as AvatarStyle) === 'pixel' ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={seatCharacterImage(agent.avatarSeed, agent.seatKey)}
+              alt=""
+              draggable={false}
+              style={{
+                position: 'absolute',
+                inset: 0,
+                margin: 'auto',
+                width: SEAT_SPRITE_PX,
+                height: SEAT_SPRITE_PX,
+                objectFit: 'contain',
+                imageRendering: 'auto',
+                filter: isThinking
+                  ? 'drop-shadow(0 0 12px rgba(201,151,63,0.45)) drop-shadow(0 1px 2px rgba(0,0,0,0.45))'
+                  : 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))',
+              }}
+            />
+          ) : (
+            <span
+              style={{
+                position: 'absolute',
+                inset: 0,
+                margin: 'auto',
+                width: SEAT_MEDALLION_PX,
+                height: SEAT_MEDALLION_PX,
+              }}
+            >
+              <Avatar
+                style={agent.avatarStyle as AvatarStyle}
+                svg={agent.avatarSvg}
+                iconName={agent.iconName}
+                name={agent.name}
+                accent={accent}
+                size={SEAT_MEDALLION_PX}
+                seed={agent.avatarSeed}
+                seatKey={agent.seatKey}
+              />
+            </span>
+          )}
+        </span>
 
         {/* Quiet label under the slot: name + vote weight, small type only. */}
         <span className="flex max-w-[9rem] flex-col items-center gap-0 leading-tight">
@@ -193,23 +244,6 @@ export function Seat({
             compact={compactBubble}
             bubbleSide={bubbleSide}
             onOpen={() => onOpen(agent.id)}
-          />
-        ) : null}
-
-        {/* Subtle active pulse on the slot outline only (transform/opacity). */}
-        {isThinking && !reducedMotion ? (
-          <motion.span
-            aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-0"
-            style={{
-              width: SLOT_W,
-              height: SLOT_H,
-              x: '-50%',
-              border: '1px solid rgba(201,151,63,0.35)',
-              borderRadius: 3,
-            }}
-            animate={{ opacity: [0.3, 0.9, 0.3] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
           />
         ) : null}
       </button>
